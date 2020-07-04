@@ -1,3 +1,20 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
+Adafruit_BME280 bme; // I2C
+// variables
+#define SEALEVELPRESSURE_HPA (1013.25)
+
+
+// Sensor
+unsigned long delayTime;
+float temperature = 0;
+float humidity = 0;
+float pressure = 0;
+float PrintInSerial = 1;
+
+
 const int led_1_pin = 15;
 const int led_2_pin = 16;
 const int led_3_pin = 4;
@@ -21,7 +38,7 @@ int tankSensorValue1_5 = 0;
 
 
 void tankLevelCheck () {
-    // put your main code here, to run repeatedly:
+  // put your main code here, to run repeatedly:
 
   tankSensorValue1_1 = analogRead(tankFloating_sen_1);
   tankSensorValue1_2 = analogRead(tankFloating_sen_2);
@@ -93,7 +110,7 @@ void tankLevelCheck () {
     digitalWrite(led_4_pin, HIGH);
     digitalWrite(led_5_pin, LOW);
     Serial.println("Tank level er 75%");
-    
+
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 > sensorOn && tankSensorValue1_5 > sensorOn) {
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
@@ -104,14 +121,50 @@ void tankLevelCheck () {
   } else {
     Serial.println("sensor error");
   }
-
-
-  
   delay(1000);
 }
 
 
+void printBMEValues() {
+  Serial.print("Temperature = ");
+  Serial.print(bme.readTemperature());
+  Serial.println(" *C");
+  
+  // Convert temperature to Fahrenheit
+  /*Serial.print("Temperature = ");
+  Serial.print(1.8 * bme.readTemperature() + 32);
+  Serial.println(" *F");*/
+  
+  Serial.print("Pressure = ");
+  Serial.print(bme.readPressure() / 100.0F);
+  Serial.println(" hPa");
+
+  Serial.print("Approx. Altitude = ");
+  Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+  Serial.println(" m");
+
+  Serial.print("Humidity = ");
+  Serial.print(bme.readHumidity());
+  Serial.println(" %");
+
+  Serial.println();
+}
+
+
+
 void setup() {
+
+  // Start Serial port
+  Serial.begin(115200);
+  delay(150);
+  Serial.println();
+  Serial.println("Serial is begining");
+  while (!Serial) // Waiting for serial connection
+  {
+  }
+  delay(100);
+  Serial.println("serial has started");
+
   // Init LED and turn off
   pinMode(led_1_pin, OUTPUT);
   digitalWrite(led_1_pin, LOW);
@@ -124,15 +177,23 @@ void setup() {
   pinMode(led_5_pin, OUTPUT);
   digitalWrite(led_5_pin, LOW);
 
-  // Start Serial port
-  Serial.begin(115200);
+  bool status;
 
-  delay(10);
-  Serial.println("serial has started");
+  // default settings
+  // (you can also pass in a Wire library object like &Wire2)
+  status = bme.begin(0x76);  
+  if (!status) {
+    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+    while (1);
+  }
+
 
 }
 
 void loop() {
-  tankLevelCheck();
+     tankLevelCheck();
+    Serial.println();
+    Serial.println();
+    printBMEValues();  
 
 }
