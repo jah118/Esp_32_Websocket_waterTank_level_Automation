@@ -52,19 +52,19 @@ int tankSensorValue1_5 = 0;
 void printTankLevelSensorValue() {
   Serial.println("----Sensor Values---- ");
   Serial.println();
-  Serial.print("sensor 1: ");
+  Serial.print("sensor 1:");
   Serial.print(tankSensorValue1_1);
   Serial.println();
-  Serial.print("sensor 2: ");
+  Serial.print("sensor 2:");
   Serial.print(tankSensorValue1_2);
   Serial.println();
-  Serial.print("sensor 3: ");
+  Serial.print("sensor 3:");
   Serial.print(tankSensorValue1_3);
   Serial.println();
-  Serial.print("sensor 4: ");
+  Serial.print("sensor 4:");
   Serial.print(tankSensorValue1_4);
   Serial.println();
-  Serial.print("sensor 5: ");
+  Serial.print("sensor 5:");
   Serial.print(tankSensorValue1_5);
   Serial.println();
 }
@@ -99,7 +99,7 @@ void tankLevelCheck () {
 
   } else if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
     relayState = false;
-    relaySAFETYState  = false;
+    relaySAFETYState  = true;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
