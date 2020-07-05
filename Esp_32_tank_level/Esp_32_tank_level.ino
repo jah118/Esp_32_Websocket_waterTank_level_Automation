@@ -22,6 +22,11 @@ float humidity = 0;
 float pressure = 0;
 float PrintInSerial = 1;
 
+const int relay_1_pin = 33;
+const int relay_2_pin = 25;
+
+bool relayState;
+bool relaySAFETYState;
 
 const int led_1_pin = 15;
 const int led_2_pin = 16;
@@ -44,16 +49,7 @@ int tankSensorValue1_3 = 0;
 int tankSensorValue1_4 = 0;
 int tankSensorValue1_5 = 0;
 
-
-void tankLevelCheck () {
-  // put your main code here, to run repeatedly:
-
-  tankSensorValue1_1 = analogRead(tankFloating_sen_1);
-  tankSensorValue1_2 = analogRead(tankFloating_sen_2);
-  tankSensorValue1_3 = analogRead(tankFloating_sen_3);
-  tankSensorValue1_4 = analogRead(tankFloating_sen_4);
-  tankSensorValue1_5 = analogRead(tankFloating_sen_5);
-
+void printTankLevelSensorValue() {
   Serial.println("----Sensor Values---- ");
   Serial.println();
   Serial.print("sensor 1: ");
@@ -71,23 +67,39 @@ void tankLevelCheck () {
   Serial.print("sensor 5: ");
   Serial.print(tankSensorValue1_5);
   Serial.println();
-  //digitalWrite(led_1_pin, LOW);
-  //digitalWrite(led_2_pin, LOW);
-  //digitalWrite(led_3_pin, LOW);
+}
+
+
+void tankLevelCheck () {
+  // put your main code here, to run repeatedly:
+
+  tankSensorValue1_1 = analogRead(tankFloating_sen_1);
+  tankSensorValue1_2 = analogRead(tankFloating_sen_2);
+  tankSensorValue1_3 = analogRead(tankFloating_sen_3);
+  tankSensorValue1_4 = analogRead(tankFloating_sen_4);
+  tankSensorValue1_5 = analogRead(tankFloating_sen_5);
 
   //tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn
+    
+   if (tankSensorValue1_1 < sensorOn ) {
+    relayState = false;
+    relaySAFETYState  = false;
+    Serial.println("Tank er er tom SAFETY RELAY OFFF");
+   }
 
   if (tankSensorValue1_1 < sensorOn && tankSensorValue1_2 < sensorOn ) {
+    relayState = false;
+    relaySAFETYState  = false;
     digitalWrite(led_1_pin, LOW);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
     digitalWrite(led_4_pin, LOW);
     digitalWrite(led_5_pin, LOW);
-
     Serial.println("Tank er er tom");
 
-
   } else if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
+    relayState = false;
+    relaySAFETYState  = false;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
@@ -96,6 +108,7 @@ void tankLevelCheck () {
     Serial.println("Tank level er 12.5%");
 
   } else if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
+    relaySAFETYState  = true;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, LOW);
@@ -104,6 +117,8 @@ void tankLevelCheck () {
     Serial.println("Tank level er 25%");
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
+    relayState = true; // only for testing -----------------------------
+    relaySAFETYState  = true;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
@@ -112,6 +127,7 @@ void tankLevelCheck () {
     Serial.println("Tank level er 50%");
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 > sensorOn && tankSensorValue1_5 < sensorOn) {
+    relaySAFETYState  = true;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
@@ -120,6 +136,7 @@ void tankLevelCheck () {
     Serial.println("Tank level er 75%");
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 > sensorOn && tankSensorValue1_5 > sensorOn) {
+    relaySAFETYState  = true;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
@@ -127,9 +144,30 @@ void tankLevelCheck () {
     digitalWrite(led_5_pin, HIGH);
     Serial.println("Tank level er 100%");
   } else {
+    
+    relaySAFETYState  = false;
+    Serial.println("sensor error");
+    
+    digitalWrite(led_1_pin, LOW);
+    digitalWrite(led_2_pin, LOW);
+    digitalWrite(led_3_pin, LOW);
+    digitalWrite(led_4_pin, LOW);
+    digitalWrite(led_5_pin, LOW);
+    delay(100);
+    digitalWrite(led_1_pin, HIGH);
+    digitalWrite(led_2_pin, HIGH);
+    digitalWrite(led_3_pin, HIGH);
+    digitalWrite(led_4_pin, HIGH);
+    digitalWrite(led_5_pin, HIGH);
+    delay(100);
+    digitalWrite(led_1_pin, LOW);
+    digitalWrite(led_2_pin, LOW);
+    digitalWrite(led_3_pin, LOW);
+    digitalWrite(led_4_pin, LOW);
+    digitalWrite(led_5_pin, LOW);
     Serial.println("sensor error");
   }
-  delay(1000);
+ 
 }
 
 
@@ -160,6 +198,7 @@ void printBMEValues() {
 
 
 
+
 void setup() {
 
   // Start Serial port
@@ -185,6 +224,13 @@ void setup() {
   pinMode(led_5_pin, OUTPUT);
   digitalWrite(led_5_pin, LOW);
 
+  pinMode(relay_1_pin, OUTPUT);
+  digitalWrite(relay_1_pin, LOW);
+  pinMode(relay_2_pin, OUTPUT);
+  digitalWrite(relay_2_pin, LOW);
+
+ 
+
   bool status;
 
   // default settings
@@ -195,13 +241,29 @@ void setup() {
     while (1);
   }
 
+  relayState = false;
+  relaySAFETYState  = false;
 
 }
 
 void loop() {
      tankLevelCheck();
+     printTankLevelSensorValue();
     Serial.println();
     Serial.println();
     printBMEValues();  
+    Serial.println(relayState);
+   
+    if(relayState == true && relaySAFETYState == true) {
+      Serial.println("ON");
+       digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+       digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+    } else {
+      Serial.println("OFF");
+       digitalWrite(relay_1_pin, LOW); // LOW slukker
+       digitalWrite(relay_2_pin, LOW); // LOW slukker
+    }
+    
+     delay(500);
 
 }
