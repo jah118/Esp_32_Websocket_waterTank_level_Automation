@@ -1,0 +1,416 @@
+﻿<!DOCTYPE html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <meta charset="utf-8" />
+  <title>WebSocket Test</title>
+</head>
+ 
+ <style>
+ section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  
+
+}
+
+section .wrapper {
+  margin: 70px 50px 0 50px;
+}
+    body {
+    padding: 50px 0;
+    text-align: center;
+    font-family: "Trebuchet MS", Arial;
+}
+ 
+input {
+    margin-bottom: 30px;
+}
+ 
+.cylinder {
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 100px;
+    height: 300px;
+    border-radius: 50px/25px;
+    background-color: rgba(160, 160, 160, 0.5);
+}
+ 
+.cylinder:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 50px;
+    border-radius: 50px/25px;
+    background-color: rgba(160, 160, 160, 0.2);
+    content: '';
+}
+ 
+.cylinder:after {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100px;
+    height: 50px;
+    border-radius: 50px/25px;
+    background-color: rgba(160, 160, 160, 0.4);
+    content: '';
+}
+ 
+.water {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100px;
+    height: 0;
+    padding-top: 50px;
+    border-radius: 50px/25px;
+    background-color: rgba(0, 160, 160, 0.5);
+    transition: 0.3s linear;
+}
+ 
+.water:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 50px;
+    border-radius: 50px/25px;
+    background-color: rgba(0, 160, 160, 0.2);
+    content: '';
+}
+ 
+.water:after {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100px;
+    height: 50px;
+    border-radius: 50px/25px;
+    background-color: rgba(0, 160, 160, 0.4);
+    content: '';
+}
+ 
+.water--0:checked ~ .cylinder .water {
+    bottom: -50px;
+}
+ 
+.water--30:checked ~ .cylinder .water {
+    height: calc(250px * 0.25);
+}
+ 
+.water--50:checked ~ .cylinder .water {
+    height: calc(250px * 0.5);
+}
+.water--75:checked ~ .cylinder .water {
+    height: calc(250px * 0.75);
+}
+ 
+.water--90:checked ~ .cylinder .water {
+    height: calc(250px * 0.999);
+}
+   
+    table {
+      border-collapse: collapse;
+      margin-left:auto;
+      margin-right:auto;
+    }
+    th {
+      padding: 12px;
+      background-color: #0043af;
+      color: white;
+    }
+    tr {
+      border: 1px solid #ddd;
+      padding: 12px;
+    }
+    tr:hover {
+      background-color: #bcbcbc;
+    }
+    td {
+      border: none; padding: 12px;
+    }
+    .sensor {
+      color:white;
+      font-weight: bold;
+      background-color: #bcbcbc;
+      padding: 1px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-left:auto;
+      margin-right:auto;
+    }
+    th {
+      padding: 12px;
+      background-color: #0043af;
+      color: white;
+    }
+    tr {
+      border: 1px solid #ddd;
+      padding: 12px;
+    }
+    tr:hover {
+      background-color: #bcbcbc;
+    }
+    td {
+      border: none; padding: 12px;
+    }
+     .sensor {
+         color: white;
+         font-weight: bold;
+         background-color: #bcbcbc;
+         padding: 1px;
+     }
+ </style>
+
+
+<h2>Water Level Control</h2>
+<section>
+<p>Current Temperture: <span id="temper"></span></P>
+
+<div class="wrapper">
+  <table>
+		<tr>
+          <td><button id="toggleButton" onclick="onPress()" disabled>Toggle Relay</button></td>
+          <td><canvas id="led" width="50" height="50"></canvas></td>
+		</tr>
+	  
+		<tr>
+      <th>MEASUREMENT</th>
+      <th>VALUE</th>
+    </tr>
+    <tr>
+      <td>Temp. Celsius</td>
+	  <td> <span id ="BMETemp"> C</span></td>
+	</tr>
+    <tr>
+      <td>Temp. Fahrenheit</td>
+      <td><span class="sensor">--- *F</span></td>
+    </tr>
+    <tr>
+      <td>Pressure</td>
+      <td><span class="sensor">--- hPa</span></td>
+    </tr>
+    <tr>
+      <td>Approx. Altitude</td>
+      <td><span class="sensor">--- m</span></td>
+    </tr>
+    <tr>
+      <td>Humidity</td>
+      <td><span id ="BMEHum" >%</span></td>
+    </tr>
+  </table>
+</div>
+ 
+ <div class="wrapper">
+    <input type="radio" name="water" class="water--0" id="r0">
+    <label for="r0">empty</label>
+    <input type="radio" name="water" class="water--30" id="r1">
+    <label for="r1">25%</label>
+    <input type="radio" name="water" class="water--50" id="r2">
+    <label for="r2">50%</label>
+    <input type="radio" name="water" class="water--75" id="r3">
+    <label for="r3">75%</label>
+    <input type="radio" name="water" class="water--90" id="r4">
+    <label for="r4">100%</label>
+ 
+		<div class="cylinder">
+			<div class="water"></div>
+		</div>
+</div>
+
+</section>
+
+
+  
+<script>
+    var url = "ws://10.10.1.68:1337/";
+    var output;
+    var button;
+    var canvas;
+    var context;
+    var cons;
+
+
+
+    setInterval(function () {
+        getTemperature();
+        getHumidity();
+      //  getData();
+
+    }, 10000);
+
+ 
+// This is called when the page finishes loading 
+function init() {
+ 
+    // Assign page elements to variables
+    button = document.getElementById("toggleButton");
+    output = document.getElementById("output");
+    canvas = document.getElementById("led");
+
+    // Draw circle in canvas
+    context = canvas.getContext("2d");
+    context.arc(25, 25, 15, 0, Math.PI * 2, false);
+    context.lineWidth = 3;
+    context.strokeStyle = "black";
+    context.stroke();
+    context.fillStyle = "black";
+    context.fill();
+   
+    // Connect to WebSocket server
+    wsConnect(url);
+}
+ 
+// Call this to connect to the WebSocket server
+function wsConnect(url) {
+   
+    // Connect to WebSocket server
+    websocket = new WebSocket(url);
+   
+    // Assign callbacks
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };
+
+}
+ 
+// Called when a WebSocket connection is established with the server
+function onOpen(evt) {
+ 
+    // Log connection state
+    console.log("Connected");
+   
+    // Enable button
+    button.disabled = false;
+   
+    // Get the current state of the LED
+    doSend("getLEDState");
+	doSend("getTempData");
+}
+ 
+// Called when the WebSocket connection is closed
+function onClose(evt) {
+ 
+    // Log disconnection state
+    console.log("Disconnected");
+   
+    // Disable button
+    button.disabled = true;
+   
+    // Try to reconnect after a few seconds
+    setTimeout(function() { wsConnect(url) }, 2000);
+}
+ 
+// Called when a message is received from the server
+function onMessage(evt) {
+ 	var dataMSG;
+    // Print out our received message
+    console.log("Received: " + evt.data);
+    dataMSG = " " + evt.data;
+    dataRV = evt.data;
+    
+    // Update circle graphic with LED state
+    switch(evt.data) {
+        case "0":
+            console.log("LED is off");
+            context.fillStyle = "red";
+            context.fill();
+            break;
+        case "1":
+            console.log("LED is on");
+            context.fillStyle = "green";
+            context.fill();
+            break;
+        case "Temperature":
+            var temp = evt.data;
+            var res = str.split(":");
+            console.log(res);
+            document.getElementById("BMEHum").innerHTML = res;
+
+// 			document.getElementById("temper").innerHTML =  evt.data;
+// 			document.getElementById("BMETemp").innerHTML =  evt.data;
+// 			//temp = dataMSG;
+// 			break;
+        default:
+            var json = evt.data;
+            var obj = JSON.parse(json);
+            console.log(obj.SensorType);
+            console.log(obj.value);
+            if (obj["SensorType"] == "Temperature") {
+                console.log("Received: temp ");
+                document.getElementById("BMETemp").innerHTML = obj.value;
+            } else if (obj.SensorType == "Humidity") {
+                console.log("Received: hum ");
+                document.getElementById("BMEHum").innerHTML = obj.value;
+            }
+        	//document.getElementById("BMETemp").innerHTML = evt.data;
+            break;
+    }
+    
+    
+	var str = evt.data;
+	var res = str.split("");
+	
+}
+ 
+// Called when a WebSocket error occurs
+function onError(evt) {
+    console.log("ERROR: " + evt.data);
+}
+ 
+// Sends a message to the server (and prints it to the console)
+function doSend(message) {
+    console.log("Sending: " + message);
+    websocket.send(message);
+}
+ 
+// Called whenever the HTML button is pressed
+function onPress() {
+    doSend("toggleLED");
+    doSend("getLEDState");
+
+}
+
+function getData() {
+	//doSend("getTempData");
+	//onMessage
+    var message = "/getDATA";
+    console.log("Sending: " + message);
+    websocket.send(message);
+
+}   
+function getTemperature() {
+	var tempera = 0;
+	var message = "/getTemperature";
+	console.log("Sending: " + message);
+    websocket.send(message);
+		
+	//doSend("getTempData");
+	//onMessage
+} 
+function getHumidity() {
+	var hyms = 0;
+	var message = "/getHumidity";
+	console.log("Sending: " + message);
+    websocket.send(message);
+	//doSend("/getHumidity");
+	//onMessage
+} 
+function getPressure() {
+	doSend("getTempData");
+	onMessage
+} 
+
+ 
+// Call the init function as soon as the page loads
+window.addEventListener("load", init, false);
+</script>
+ 
