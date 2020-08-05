@@ -1,8 +1,8 @@
 
-    /////////////////////////////////////////////////////////////////
-   //                  ESP32 Project:                             //
-  //                                                             //
- //            Author:  Jonas                                   //
+/////////////////////////////////////////////////////////////////
+//                  ESP32 Project:                             //
+//                                                             //
+//            Author:  Jonas                                   //
 //             Year:    2020                                   //
 /////////////////////////////////////////////////////////////////
 
@@ -17,44 +17,75 @@
 #include <ArduinoJson.h>
 
 
-Adafruit_BME280 bme; // I2C
-// variables
+
+/***********************************************************
+   variables
+************************************************************/
+
+
+Adafruit_BME280 bme; // I2C sat
+// Constants
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 
 // Sensor
-unsigned long delayTime;
-float temperature = 0;
-float humidity = 0;
-float pressure = 0;
-float PrintInSerial = 1;
+//unsigned long delayTime; //delete later 
+//float temperatureP = 0;
+//float humidityP = 0;
+//float pressureP = 0;
+////float PrintInSerial = 1;
 
+//relay pins 
 const int relay_1_pin = 33;
 const int relay_2_pin = 25;
 
 bool relayState;
 bool relaySAFETYState;
 
+//Led pins
 const int led_1_pin = 15;
 const int led_2_pin = 16;
 const int led_3_pin = 4;
 const int led_4_pin = 17;
 const int led_5_pin = 18;
 
-
+//water level sensons pins
 const int tankFloating_sen_1 = 36;
 const int tankFloating_sen_2 = 39;
 const int tankFloating_sen_3 = 34;
 const int tankFloating_sen_4 = 35;
 const int tankFloating_sen_5 = 32;
 
-
+//Waterlevel sensor values
 int sensorOn = 2400 ; //700 old
 int tankSensorValue1_1 = 0;
 int tankSensorValue1_2 = 0;
 int tankSensorValue1_3 = 0;
 int tankSensorValue1_4 = 0;
 int tankSensorValue1_5 = 0;
+
+//Wifi
+char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
+char* password = "1PoulThomsen";
+
+
+// Globals
+const char* PARAM_MESSAGE = "message";
+String header;
+AsyncWebServer server(80);
+WebSocketsServer webSocket = WebSocketsServer(1337);
+char msg_buf[10];
+int led_state = 0;
+const int led_pin = 15;
+String temps = "0";
+
+
+//mangler alle funk fra andet sript 
+
+
+/***********************************************************
+   Functions
+************************************************************/
 
 void printTankLevelSensorValue() {
   Serial.println("----Sensor Values---- ");
@@ -87,12 +118,12 @@ void tankLevelCheck () {
   tankSensorValue1_5 = analogRead(tankFloating_sen_5);
 
   //tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn
-    
-   if (tankSensorValue1_1 < sensorOn ) {
+
+  if (tankSensorValue1_1 < sensorOn ) {
     relayState = false;
     relaySAFETYState  = false;
     Serial.println("Tank er er tom SAFETY RELAY OFFF");
-   }
+  }
 
   if (tankSensorValue1_1 < sensorOn && tankSensorValue1_2 < sensorOn ) {
     relayState = false;
@@ -151,10 +182,10 @@ void tankLevelCheck () {
     digitalWrite(led_5_pin, HIGH);
     Serial.println("Tank level er 100%");
   } else {
-    
+
     relaySAFETYState  = false;
     Serial.println("sensor error");
-    
+
     digitalWrite(led_1_pin, LOW);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
@@ -174,7 +205,7 @@ void tankLevelCheck () {
     digitalWrite(led_5_pin, LOW);
     Serial.println("sensor error");
   }
- 
+
 }
 
 
@@ -182,12 +213,12 @@ void printBMEValues() {
   Serial.print("Temperature = ");
   Serial.print(bme.readTemperature());
   Serial.println(" *C");
-  
+
   // Convert temperature to Fahrenheit
   /*Serial.print("Temperature = ");
-  Serial.print(1.8 * bme.readTemperature() + 32);
-  Serial.println(" *F");*/
-  
+    Serial.print(1.8 * bme.readTemperature() + 32);
+    Serial.println(" *F");*/
+
   Serial.print("Pressure = ");
   Serial.print(bme.readPressure() / 100.0F);
   Serial.println(" hPa");
@@ -236,13 +267,13 @@ void setup() {
   pinMode(relay_2_pin, OUTPUT);
   digitalWrite(relay_2_pin, LOW);
 
- 
+
 
   bool status;
 
   // default settings
   // (you can also pass in a Wire library object like &Wire2)
-  status = bme.begin(0x76);  
+  status = bme.begin(0x76);
   if (!status) {
     Serial.println("Could not find a valid BME280 sensor, check wiring!");
     while (1);
@@ -254,23 +285,23 @@ void setup() {
 }
 
 void loop() {
-     tankLevelCheck();
-     printTankLevelSensorValue();
-    Serial.println();
-    Serial.println();
-    printBMEValues();  
-    Serial.println(relayState);
-   
-    if(relayState == true && relaySAFETYState == true) {
-      Serial.println("ON");
-       digitalWrite(relay_1_pin, HIGH); // HIGH tænder
-       digitalWrite(relay_1_pin, HIGH); // HIGH tænder
-    } else {
-      Serial.println("OFF");
-       digitalWrite(relay_1_pin, LOW); // LOW slukker
-       digitalWrite(relay_2_pin, LOW); // LOW slukker
-    }
-    
-     delay(500);
+  tankLevelCheck();
+  printTankLevelSensorValue();
+  Serial.println();
+  Serial.println();
+  printBMEValues();
+  Serial.println(relayState);
+
+  if (relayState == true && relaySAFETYState == true) {
+    Serial.println("ON");
+    digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+    digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+  } else {
+    Serial.println("OFF");
+    digitalWrite(relay_1_pin, LOW); // LOW slukker
+    digitalWrite(relay_2_pin, LOW); // LOW slukker
+  }
+
+  delay(500);
 
 }
