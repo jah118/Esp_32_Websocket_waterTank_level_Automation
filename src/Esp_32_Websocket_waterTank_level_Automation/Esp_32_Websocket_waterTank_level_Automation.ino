@@ -6,6 +6,13 @@
 //             Year:    2020                                   //
 /////////////////////////////////////////////////////////////////
 
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //                   source:                                                                                                   //
+  // https://shawnhymel.com/1882/how-to-create-a-web-server-with-websockets-using-an-esp32-in-arduino/                           //
+  //                                                                                                                             //
+  //                                                                                                                             //
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
 
 #include <WiFi.h>
 #include <SPIFFS.h>
@@ -18,14 +25,17 @@
 
 
 
+
 /***********************************************************
    variables
 ************************************************************/
 
-
+//BME280
 Adafruit_BME280 bme; // I2C sat
+
 // Constants
 #define SEALEVELPRESSURE_HPA (1013.25)
+unsigned long delayTime;
 
 
 // Sensor
@@ -39,11 +49,12 @@ Adafruit_BME280 bme; // I2C sat
 const int relay_1_pin = 33;
 const int relay_2_pin = 25;
 
-int led_state = 0; // dette bruge til simulere relay
-const int led_pin = 15; // dette bruge til simulere relay i websocket.
+//int led_state = 0; // dette bruge til simulere relay
+//const int led_pin = 15; // dette bruge til simulere relay i websocket.
 
+int relay_state = 0;
 bool relayState;
-bool relaySAFETYState;
+bool relaySafeToUse;
 
 //Led pins
 const int led_1_pin = 15;
@@ -67,9 +78,12 @@ int tankSensorValue1_3 = 0;
 int tankSensorValue1_4 = 0;
 int tankSensorValue1_5 = 0;
 
+//WaterLevel state
+String waterLevelState = "Level_0";
+
 //Wifi
-char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
-char* password = "1PoulThomsen";
+const char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
+const char* password = "1PoulThomsen";
 
 
 // Globals
@@ -80,10 +94,6 @@ WebSocketsServer webSocket = WebSocketsServer(1337);
 char msg_buf[10];
 
 String temps = "0";
-
-
-//mangler alle funk fra andet sript
-
 
 /***********************************************************
    Functions
@@ -121,14 +131,17 @@ void tankLevelCheck () {
   //tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn
 
   if (tankSensorValue1_1 < sensorOn ) {
+    //relay_state = 0;
     relayState = false;
-    relaySAFETYState  = false;
+    relaySafeToUse  = false;
     Serial.println("Tank er er tom SAFETY RELAY OFFF");
   }
 
   if (tankSensorValue1_1 < sensorOn && tankSensorValue1_2 < sensorOn ) {
-    relayState = false;
-    relaySAFETYState  = false;
+    //relay_state = 0;
+    //relayState = false;
+    relaySafeToUse  = false;
+    waterLevelState = "Level_0";
     digitalWrite(led_1_pin, LOW);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
@@ -137,8 +150,10 @@ void tankLevelCheck () {
     Serial.println("Tank er er tom");
 
   } else if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
-    relayState = false;
-    relaySAFETYState  = true;
+    //relay_state = 0;
+    //relayState = false;
+    relaySafeToUse  = true;
+    waterLevelState = "Level_12.5";
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
@@ -147,7 +162,9 @@ void tankLevelCheck () {
     Serial.println("Tank level er 12.5%");
 
   } else if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
-    relaySAFETYState  = true;
+    //relay_state = 0;
+    relaySafeToUse  = true;
+    waterLevelState = "Level_25";
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, LOW);
@@ -156,8 +173,10 @@ void tankLevelCheck () {
     Serial.println("Tank level er 25%");
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
-    relayState = true; // only for testing -----------------------------
-    relaySAFETYState  = true;
+    //relay_state = 1; // only for testing -----------------------------
+    // relayState = true; // only for testing -----------------------------
+    relaySafeToUse  = true;
+    waterLevelState = "Level_50";
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
@@ -166,7 +185,8 @@ void tankLevelCheck () {
     Serial.println("Tank level er 50%");
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 > sensorOn && tankSensorValue1_5 < sensorOn) {
-    relaySAFETYState  = true;
+    relaySafeToUse  = true;
+    waterLevelState = "Level_75";
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
@@ -175,16 +195,19 @@ void tankLevelCheck () {
     Serial.println("Tank level er 75%");
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 > sensorOn && tankSensorValue1_5 > sensorOn) {
-    relaySAFETYState  = true;
+    relaySafeToUse  = true;
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
     digitalWrite(led_4_pin, HIGH);
     digitalWrite(led_5_pin, HIGH);
+    waterLevelState = "Level_100";
     Serial.println("Tank level er 100%");
   } else {
 
-    relaySAFETYState  = false;
+    relaySafeToUse  = false;
+    waterLevelState = "Level_error";
+
     Serial.println("sensor error");
 
     digitalWrite(led_1_pin, LOW);
@@ -259,6 +282,7 @@ void printSensor() {
 }
 
 void printBMEValues() {
+  delay(1000);
   Serial.println();
   Serial.println();
 
@@ -325,13 +349,16 @@ void onWebSocketEvent(uint8_t client_num,
 
       // Toggle LED
       if ( strcmp((char *)payload, "toggleLED") == 0 ) {
-        led_state = led_state ? 0 : 1;
-        Serial.printf("Toggling LED to %u\n", led_state);
-        digitalWrite(led_pin, led_state);
+        //led_state = led_state ? 0 : 1; // old
+        relay_state = relay_state ? 0 : 1;
+        //Serial.printf("Toggling LED to %u\n", led_state);
+        Serial.printf("Toggling relay to %u\n", relay_state);
+        //digitalWrite(led_pin, led_state); // --------------------------------------------------------------------------------
+        digitalWrite(relay_1_pin, relay_state);
 
         // Report the state of the LED
       } else if ( strcmp((char *)payload, "getLEDState") == 0 ) {
-        sprintf(msg_buf, "%d", led_state);
+        sprintf(msg_buf, "%d", relay_state);
         Serial.printf("Sending to [%u]: %s\n", client_num, msg_buf);
         webSocket.sendTXT(client_num, msg_buf);
 
@@ -369,8 +396,25 @@ void onWebSocketEvent(uint8_t client_num,
 
         webSocket.sendTXT(client_num, buffers, len);
 
+      } else if (strcmp((char *)payload, "/getWaterLevel") == 0) {
+        String p = waterLevelState;
+
+        // allocate the memory for the document
+        const size_t capacity = JSON_OBJECT_SIZE(2) + 60;
+        StaticJsonDocument<capacity> docs;
+
+        // create an object
+        JsonObject obj = docs.to<JsonObject>();
+        obj["SensorType"] = "Water Level";
+        obj["value"] = p;
+
+        char  buffers[200]; // create temp buffer
+        size_t len = serializeJson(obj, buffers);  // serialize to buffer
+
+        webSocket.sendTXT(client_num, buffers, len);
+
       } else if (strcmp((char *)payload, "/getPressure") == 0) {
-        String p = String(readBME280Pressure());
+        String p = String(readBME280Pressure());//kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
 
         // allocate the memory for the document
         const size_t capacity = JSON_OBJECT_SIZE(2) + 60;
@@ -385,6 +429,7 @@ void onWebSocketEvent(uint8_t client_num,
         size_t len = serializeJson(obj, buffers);  // serialize to buffer
 
         webSocket.sendTXT(client_num, buffers, len);
+
 
       } else  {
         // Message not recognized
@@ -554,18 +599,58 @@ void setup() {
     while (1);
   }
 
-  relayState = false;
-  relaySAFETYState  = false;
+  //rates ande code from https://github.com/adafruit/Adafruit_BME280_Library/blob/master/examples/advancedsettings/advancedsettings.ino
+  // and bme280 doc
+
+  // indoor navigation
+  Serial.println("-- Indoor Navigation Scenario --");
+  Serial.println("normal mode, 16x pressure / 2x temperature / 1x humidity oversampling,");
+  Serial.println("0.5ms standby period, filter 16x");
+  bme.setSampling(Adafruit_BME280::MODE_NORMAL,
+                  Adafruit_BME280::SAMPLING_X16,  // temperature
+                  Adafruit_BME280::SAMPLING_X16, // pressure
+                  Adafruit_BME280::SAMPLING_X16,  // humidity
+                  Adafruit_BME280::FILTER_X16,
+                  Adafruit_BME280::STANDBY_MS_0_5 );
+
+  // suggested rate is 25Hz
+  // 1 + (2 * T_ovs) + (2 * P_ovs + 0.5) + (2 * H_ovs + 0.5)
+  // T_ovs = 2
+  // P_ovs = 16
+  // H_ovs = 1
+  // = 40ms (25Hz)
+  // with standby time that should really be 24.16913... Hz
+  delayTime = 41;
+
+
+  relay_state = 0;
+  //relayState = false;
+  relaySafeToUse  = false;
 
 }
 
 void loop() {
   tankLevelCheck();
   printTankLevelSensorValue(); // debug for senvalues
-  printBMEValues();
-  Serial.println(relayState);
+  //printBMEValues();
+  delay(delayTime);
 
-  if (relayState == true && relaySAFETYState == true) {
+  Serial.println(relayState);
+  Serial.println("state is " + relay_state);
+
+  /*
+    if (relayState == true && relaySafeToUse == true) {
+      Serial.println("ON");
+      digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+      digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+    } else {
+      Serial.println("OFF");
+      digitalWrite(relay_1_pin, LOW); // LOW slukker
+      digitalWrite(relay_2_pin, LOW); // LOW slukker
+    }
+  */
+
+  if (relay_state > 0 && relaySafeToUse == true) {
     Serial.println("ON");
     digitalWrite(relay_1_pin, HIGH); // HIGH tænder
     digitalWrite(relay_1_pin, HIGH); // HIGH tænder
@@ -575,9 +660,9 @@ void loop() {
     digitalWrite(relay_2_pin, LOW); // LOW slukker
   }
 
+
   // Look for and handle WebSocket data
   webSocket.loop();
 
-  delay(500);
 
 }
