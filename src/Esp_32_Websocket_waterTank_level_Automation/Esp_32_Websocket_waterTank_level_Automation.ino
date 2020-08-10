@@ -27,7 +27,7 @@
 
 
 /***********************************************************
-   variables 
+   variables
 ************************************************************/
 
 //BME280
@@ -38,7 +38,7 @@ Adafruit_BME280 bme; // I2C sat
 unsigned long delayTime;
 
 //switch pin
-const int switch_pin = 26;
+const int toggleSwitch_pin = 26;
 
 //relay pins
 const int relay_1_pin = 33;
@@ -47,6 +47,7 @@ const int relay_2_pin = 25;
 int relay_state = 0;
 bool relayState;
 bool relaySafeToUse;
+
 
 //Led pins
 const int led_1_pin = 15;
@@ -72,6 +73,9 @@ int tankSensorValue1_5 = 0;
 
 //WaterLevel state
 String waterLevelState = "Level_0";
+
+//WaterLevel 2 tanks state
+bool isWaterTankFull = false; // ------------------------------ dette er til andet sæt af sensor i 2 tank og den systemere.  
 
 //Wifi
 const char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
@@ -233,7 +237,7 @@ String readBME280Temperature() {
     return "";
   }
   else {
-   // Serial.println(t);
+    // Serial.println(t);
     return String(t);
   }
 }
@@ -470,7 +474,7 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 void setup() {
 
   //Init Switch
-  pinMode(switch_pin, INPUT);
+  pinMode(toggleSwitch_pin, INPUT);
 
   // Init LED and turn off
   pinMode(led_1_pin, OUTPUT);
@@ -640,18 +644,27 @@ void loop() {
       digitalWrite(relay_2_pin, LOW); // LOW slukker
     }
   */
-  if(digitalRead(switch_pin) == HIGH && relaySafeToUse == true){
+/*
+ * the if stament checks if relaySafeToUse = " if there water in main tank"  and if 
+ * 
+ */
+
+  if (digitalRead(toggleSwitch_pin) == HIGH && relaySafeToUse == true && isWaterTankFull == false) {
     Serial.println("Switching ON");
     relay_state = 1;
   }
+  if (digitalRead(toggleSwitch_pin) == LOW && relaySafeToUse == true) {
+    Serial.println("Switching OFF");
+    relay_state = 0;
+  }
 
-  if (relay_state > 0 && relaySafeToUse == true) {
+  if (relay_state > 0 && relaySafeToUse == true && isWaterTankFull == false) {
     Serial.println("ON");
-//    relay_state = 1;
+    //    relay_state = 1;
     digitalWrite(relay_1_pin, HIGH); // HIGH tænder
     digitalWrite(relay_2_pin, HIGH); // HIGH tænder
   } else {
-//    relay_state = 0;
+    //    relay_state = 0;
     Serial.println("OFF");
     digitalWrite(relay_1_pin, LOW); // LOW slukker
     digitalWrite(relay_2_pin, LOW); // LOW slukker
