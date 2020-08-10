@@ -27,7 +27,7 @@
 
 
 /***********************************************************
-   variables
+   variables 
 ************************************************************/
 
 //BME280
@@ -37,20 +37,12 @@ Adafruit_BME280 bme; // I2C sat
 #define SEALEVELPRESSURE_HPA (1013.25)
 unsigned long delayTime;
 
-
-// Sensor
-//unsigned long delayTime; //delete later
-//float temperatureP = 0;
-//float humidityP = 0;
-//float pressureP = 0;
-////float PrintInSerial = 1;
+//switch pin
+const int switch_pin = 26;
 
 //relay pins
 const int relay_1_pin = 33;
 const int relay_2_pin = 25;
-
-//int led_state = 0; // dette bruge til simulere relay
-//const int led_pin = 15; // dette bruge til simulere relay i websocket.
 
 int relay_state = 0;
 bool relayState;
@@ -85,7 +77,6 @@ String waterLevelState = "Level_0";
 const char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
 const char* password = "1PoulThomsen";
 
-
 // Globals
 const char* PARAM_MESSAGE = "message";
 String header;
@@ -93,7 +84,6 @@ AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(1337);
 char msg_buf[10];
 
-String temps = "0";
 
 /***********************************************************
    Functions
@@ -131,15 +121,15 @@ void tankLevelCheck () {
   //tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn
 
   if (tankSensorValue1_1 < sensorOn ) {
-    //relay_state = 0;
+    relay_state = 0;
     relayState = false;
     relaySafeToUse  = false;
     Serial.println("Tank er er tom SAFETY RELAY OFFF");
   }
 
   if (tankSensorValue1_1 < sensorOn && tankSensorValue1_2 < sensorOn ) {
-    //relay_state = 0;
-    //relayState = false;
+    relay_state = 0;
+    relayState = false;
     relaySafeToUse  = false;
     waterLevelState = "Level_0";
     digitalWrite(led_1_pin, LOW);
@@ -204,7 +194,7 @@ void tankLevelCheck () {
     waterLevelState = "Level_100";
     Serial.println("Tank level er 100%");
   } else {
-
+    relay_state = 0;
     relaySafeToUse  = false;
     waterLevelState = "Level_error";
 
@@ -215,13 +205,13 @@ void tankLevelCheck () {
     digitalWrite(led_3_pin, LOW);
     digitalWrite(led_4_pin, LOW);
     digitalWrite(led_5_pin, LOW);
-    delay(100);
+    delay(200);
     digitalWrite(led_1_pin, HIGH);
     digitalWrite(led_2_pin, HIGH);
     digitalWrite(led_3_pin, HIGH);
     digitalWrite(led_4_pin, HIGH);
     digitalWrite(led_5_pin, HIGH);
-    delay(100);
+    delay(200);
     digitalWrite(led_1_pin, LOW);
     digitalWrite(led_2_pin, LOW);
     digitalWrite(led_3_pin, LOW);
@@ -229,16 +219,13 @@ void tankLevelCheck () {
     digitalWrite(led_5_pin, LOW);
     Serial.println("sensor error");
   }
-
 }
 
-
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------\\
 
 String readBME280Temperature() {
   // Read temperature as Celsius (the default)
   float t = bme.readTemperature();
-  temps = t;
   // Convert temperature to Fahrenheit
   //t = 1.8 * t + 32;
   if (isnan(t)) {
@@ -246,7 +233,7 @@ String readBME280Temperature() {
     return "";
   }
   else {
-    Serial.println(t);
+   // Serial.println(t);
     return String(t);
   }
 }
@@ -258,7 +245,7 @@ String readBME280Humidity() {
     return "";
   }
   else {
-    Serial.println(h);
+    //Serial.println(h);
     return String(h);
   }
 }
@@ -270,12 +257,13 @@ String readBME280Pressure() {
     return "";
   }
   else {
-    Serial.println(p);
+    //Serial.println(p);
     return String(p);
   }
 }
 
 void printSensor() {
+  delay(1000);
   Serial.println(readBME280Temperature());
   Serial.println(readBME280Humidity());
   Serial.println(readBME280Pressure());
@@ -481,6 +469,9 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 
 void setup() {
 
+  //Init Switch
+  pinMode(switch_pin, INPUT);
+
   // Init LED and turn off
   pinMode(led_1_pin, OUTPUT);
   digitalWrite(led_1_pin, LOW);
@@ -649,12 +640,18 @@ void loop() {
       digitalWrite(relay_2_pin, LOW); // LOW slukker
     }
   */
+  if(digitalRead(switch_pin) == HIGH && relaySafeToUse == true){
+    Serial.println("Switching ON");
+    relay_state = 1;
+  }
 
   if (relay_state > 0 && relaySafeToUse == true) {
     Serial.println("ON");
+//    relay_state = 1;
     digitalWrite(relay_1_pin, HIGH); // HIGH tænder
-    digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+    digitalWrite(relay_2_pin, HIGH); // HIGH tænder
   } else {
+//    relay_state = 0;
     Serial.println("OFF");
     digitalWrite(relay_1_pin, LOW); // LOW slukker
     digitalWrite(relay_2_pin, LOW); // LOW slukker
