@@ -361,16 +361,14 @@ input {
                         } else if (obj.value == "Level_25") {
                             setWaterLevel("r2");
                         } else if (obj.value == "Level_50") {
-                            //setWaterLevel("r3");
-                            radiobtn = document.getElementById('water--50');
-                            radiobtn.checked = true;
+                            setWaterLevel("r3");
                         } else if (obj.value == "Level_75") {
-                           // setWaterLevel("r4");
-                            document.getElementById('water--75').checked = true;
+                            setWaterLevel("r4");
                         } else if (obj.value == "Level_100") {
                             setWaterLevel("r5");
                         } else if (obj.value == "Level_error") {
                             console.log("Water level is on " + obj.value);
+                           // alert("Water level sensor readings is whrong check sensors" + obj.value);
                         }
                         
                         break;
@@ -406,9 +404,6 @@ input {
                     //    break;
 
                 }
-
-
-
                 //if (obj["SensorType"] == "Temperature") {
                 //    console.log("Received: temp ");
                 //    document.getElementById("BMETemp").innerHTML = obj.value + "°C";
@@ -422,11 +417,6 @@ input {
                 //document.getElementById("BMETemp").innerHTML = evt.data;
                 break;
         }
-
-
-        var str = evt.data;
-        var res = str.split("");
-
     }
 
     // Called when a WebSocket error occurs
