@@ -205,7 +205,7 @@ input {
 <div class="wrapper">
     <input type="radio" name="water" class="water--0" id="r0" checked>
     <label for="r0">empty</label>
-    <input type="radio" name="water" class="water--12" id="r1">
+    <input type="radio" name="water" class="water--12" id="r1" >
     <label for="r1">12.5%</label>
     <input type="radio" name="water" class="water--25" id="r2">
     <label for="r2">25%</label>
@@ -240,7 +240,12 @@ input {
             getHumidity();
             getPressure();
             doSend("getLEDState");
-            doSend("/getWaterLevel");
+            //doSend("/getWaterLevel");
+            
+            setTimeout(function () {
+            getWaterLevel();
+
+            }, 50);
 
         }, 5000);
 
@@ -346,37 +351,59 @@ input {
                         console.log("Received: pre ");
                         document.getElementById("BMEPre").innerHTML = obj.value + "hPa";
                         break;
-                    case "Level_0":
-                        console.log("Water level is on " + obj.value);
-                        setWaterLevel("r0");
-                        break;
-                    case "Level_12.5":
-                        console.log("Water level is on " + obj.value);
-                        setWaterLevel("r1");
-                        break;
-                    case "Level_25":
-                        console.log("Water level is on " + obj.value);
-                        setWaterLevel('water--25');
-                        break;
-                    case "Level_50":
-                        console.log("Water level is on " + obj.value);
-                        //setWaterLevel("r3.water");
-                        radiobtn = document.getElementById('water--75');
-                        radiobtn.checked = true;
-                        break;
-                    case "Level_75":
-                        console.log("Water level is on " + obj.value);
-                        //setWaterLevel("r4");
-                        document.getElementById('water--75').checked = true;
-                        break;
-                    case "Level_100":
-                        console.log("Water level is on " + obj.value);
-                        setWaterLevel("r5");
-                        break;
-                    case "Level_error":
+                    case "Water Level":
                         console.log("Water level is on " + obj.value);
 
+                        if (obj.value == "Level_0") {
+                            setWaterLevel("r0");
+                        } else if (obj.value == "Level_12.5") {
+                            setWaterLevel("r1");
+                        } else if (obj.value == "Level_25") {
+                            setWaterLevel("r2");
+                        } else if (obj.value == "Level_50") {
+                            //setWaterLevel("r3");
+                            radiobtn = document.getElementById('water--50');
+                            radiobtn.checked = true;
+                        } else if (obj.value == "Level_75") {
+                           // setWaterLevel("r4");
+                            document.getElementById('water--75').checked = true;
+                        } else if (obj.value == "Level_100") {
+                            setWaterLevel("r5");
+                        } else if (obj.value == "Level_error") {
+                            console.log("Water level is on " + obj.value);
+                        }
+                        
                         break;
+                    //case "Level_0":
+                    //    console.log("Water level is on " + obj.value);
+                    //    setWaterLevel("r0");
+                    //    break;
+                    //case "Level_12.5":
+                    //    console.log("Water level is on " + obj.value);
+                    //    setWaterLevel("r1");
+                    //    break;
+                    //case "Level_25":
+                    //    console.log("Water level is on " + obj.value);
+                    //    setWaterLevel('water--25');
+                    //    break;
+                    //case "Level_50":
+                    //    console.log("Water level is on " + obj.value);
+                    //    //setWaterLevel("r3.water");
+                    //    radiobtn = document.getElementById('water--75');
+                    //    radiobtn.checked = true;
+                    //    break;
+                    //case "Level_75":
+                    //    console.log("Water level is on " + obj.value);
+                    //    //setWaterLevel("r4");
+                    //    document.getElementById('water--75').checked = true;
+                    //    break;
+                    //case "Level_100":
+                    //    console.log("Water level is on " + obj.value);
+                    //    setWaterLevel("r5");
+                    //    break;
+                    //case "Level_error":
+                    //    console.log("Water level is on " + obj.value);
+                    //    break;
 
                 }
 
@@ -445,21 +472,26 @@ input {
         //doSend("/getHumidity");
         //onMessage
     }
-        function getPressure() {
+    function getPressure() {
         var message = "/getPressure";
         console.log("Sending: " + message);
         //websocket.send(message);
         doSend(message);
         onMessage
     }
+    function getWaterLevel() {
+        var message = "/getWaterLevel";
+        console.log("Sending: " + message);
+        websocket.send(message);
+    }
 
-        function setWaterLevel(parameter1) {
+    function setWaterLevel(parameter1) {
             radiobtn = document.getElementById(parameter1);
             radiobtn.checked = true;
 
            //var //radiobtn = document.getElementById("theid");
             //radiobtn.checked = true;
-        }
+    }
 
     // Call the init function as soon as the page loads
     window.addEventListener("load", init, false);
