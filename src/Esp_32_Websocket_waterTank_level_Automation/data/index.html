@@ -1,251 +1,263 @@
 ﻿<!DOCTYPE html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <meta charset="utf-8" />
-  <title>WebSocket Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <meta charset="utf-8" />
+    <title>WebSocket Test</title>
 </head>
- 
- <style>
- section {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  
 
-}
+<style>
+    section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
 
-section .wrapper {
-  margin: 70px 50px 0 50px;
-}
+        section .wrapper {
+            margin: 70px 50px 0 50px;
+        }
+
     body {
-    padding: 50px 0;
-    text-align: center;
-    font-family: "Trebuchet MS", Arial;
-}
- 
-input {
-    margin-bottom: 30px;
-}
- 
-.cylinder {
-    position: relative;
-    overflow: hidden;
-    margin: 0 auto;
-    width: 100px;
-    height: 300px;
-    border-radius: 50px/25px;
-    background-color: rgba(160, 160, 160, 0.5);
-}
- 
-.cylinder:before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100px;
-    height: 50px;
-    border-radius: 50px/25px;
-    background-color: rgba(160, 160, 160, 0.2);
-    content: '';
-}
- 
-.cylinder:after {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100px;
-    height: 50px;
-    border-radius: 50px/25px;
-    background-color: rgba(160, 160, 160, 0.4);
-    content: '';
-}
- 
-.water {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100px;
-    height: 0;
-    padding-top: 50px;
-    border-radius: 50px/25px;
-    background-color: rgba(0, 160, 160, 0.5);
-    transition: 0.3s linear;
-}
- 
-.water:before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100px;
-    height: 50px;
-    border-radius: 50px/25px;
-    background-color: rgba(0, 160, 160, 0.2);
-    content: '';
-}
- 
-.water:after {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100px;
-    height: 50px;
-    border-radius: 50px/25px;
-    background-color: rgba(0, 160, 160, 0.4);
-    content: '';
-}
- 
-.water--0:checked ~ .cylinder .water {
-    bottom: -50px;
-}
+        padding: 50px 0;
+        text-align: center;
+        font-family: "Trebuchet MS", Arial;
+    }
 
-.water--12:checked ~ .cylinder .water {
-    height: calc(250px * 0.12.5);
-}
- 
-.water--25:checked ~ .cylinder .water {
-    height: calc(250px * 0.25);
-}
- 
-.water--50:checked ~ .cylinder .water {
-    height: calc(250px * 0.5);
-}
-.water--75:checked ~ .cylinder .water {
-    height: calc(250px * 0.75);
-}
- 
-.water--100:checked ~ .cylinder .water {
-    height: calc(250px * 0.999);
-}
-   
+    input {
+        margin-bottom: 30px;
+    }
+
+    .cylinder {
+        position: relative;
+        overflow: hidden;
+        margin: 0 auto;
+        width: 100px;
+        height: 300px;
+        border-radius: 50px/25px;
+        background-color: rgba(160, 160, 160, 0.5);
+    }
+
+        .cylinder:before {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100px;
+            height: 50px;
+            border-radius: 50px/25px;
+            background-color: rgba(160, 160, 160, 0.2);
+            content: '';
+        }
+
+        .cylinder:after {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100px;
+            height: 50px;
+            border-radius: 50px/25px;
+            background-color: rgba(160, 160, 160, 0.4);
+            content: '';
+        }
+
+    .water {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100px;
+        height: 0;
+        padding-top: 50px;
+        border-radius: 50px/25px;
+        background-color: rgba(0, 160, 160, 0.5);
+        transition: 0.3s linear;
+    }
+
+        .water:before {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100px;
+            height: 50px;
+            border-radius: 50px/25px;
+            background-color: rgba(0, 160, 160, 0.2);
+            content: '';
+        }
+
+        .water:after {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100px;
+            height: 50px;
+            border-radius: 50px/25px;
+            background-color: rgba(0, 160, 160, 0.4);
+            content: '';
+        }
+
+    .water--0:checked ~ .cylinder .water {
+        bottom: -50px;
+    }
+
+    .water--12:checked ~ .cylinder .water {
+        height: calc(250px * 0.12.5);
+    }
+
+    .water--25:checked ~ .cylinder .water {
+        height: calc(250px * 0.25);
+    }
+
+    .water--50:checked ~ .cylinder .water {
+        height: calc(250px * 0.5);
+    }
+
+    .water--75:checked ~ .cylinder .water {
+        height: calc(250px * 0.75);
+    }
+
+    .water--100:checked ~ .cylinder .water {
+        height: calc(250px * 0.999);
+    }
+
     table {
-      border-collapse: collapse;
-      margin-left:auto;
-      margin-right:auto;
+        border-collapse: collapse;
+        margin-left: auto;
+        margin-right: auto;
     }
+
     th {
-      padding: 12px;
-      background-color: #0043af;
-      color: white;
+        padding: 12px;
+        background-color: #0043af;
+        color: white;
     }
+
     tr {
-      border: 1px solid #ddd;
-      padding: 12px;
+        border: 1px solid #ddd;
+        padding: 12px;
     }
-    tr:hover {
-      background-color: #bcbcbc;
-    }
+
+        tr:hover {
+            background-color: #bcbcbc;
+        }
+
     td {
-      border: none; padding: 12px;
+        border: none;
+        padding: 12px;
     }
+
     .sensor {
-      color:white;
-      font-weight: bold;
-      background-color: #bcbcbc;
-      padding: 1px;
+        color: white;
+        font-weight: bold;
+        background-color: #bcbcbc;
+        padding: 1px;
     }
 
     table {
-      border-collapse: collapse;
-      margin-left:auto;
-      margin-right:auto;
+        border-collapse: collapse;
+        margin-left: auto;
+        margin-right: auto;
     }
+
     th {
-      padding: 12px;
-      background-color: #0043af;
-      color: white;
+        padding: 12px;
+        background-color: #0043af;
+        color: white;
     }
+
     tr {
-      border: 1px solid #ddd;
-      padding: 12px;
+        border: 1px solid #ddd;
+        padding: 12px;
     }
-    tr:hover {
-      background-color: #bcbcbc;
-    }
+
+        tr:hover {
+            background-color: #bcbcbc;
+        }
+
     td {
-      border: none; padding: 12px;
+        border: none;
+        padding: 12px;
     }
-     .sensor {
-         color: white;
-         font-weight: bold;
-         background-color: #bcbcbc;
-         padding: 1px;
-     }
- </style>
+
+    .sensor {
+        color: white;
+        font-weight: bold;
+        background-color: #bcbcbc;
+        padding: 1px;
+    }
+</style>
 
 
 <h2>Water Level Control</h2>
 <section>
-<div class="wrapper">
-    <table>
-        <tr>
-            <td><button id="toggleButton" onclick="onPress()" disabled>Toggle Relay</button></td>
-            <td><canvas id="led" width="50" height="50"></canvas></td>
-        </tr>
+    <div class="wrapper">
+        <table>
+            <tr>
+                <td><button id="toggleButton" onclick="onPress()" disabled>Toggle Relay</button></td>
+                <td><canvas id="led" width="50" height="50"></canvas></td>
+            </tr>
 
-        <tr>
-            <th>MEASUREMENT</th>
-            <th>VALUE</th>
-        </tr>
-        <tr>
-            <td>Temp. Celsius</td>
-            <td> <span id="BMETemp">---C</span></td>
-        </tr>
-        <tr>
-            <td>Pressure</td>
-            <td><span id="BMEPre">--- hPa</span></td>
-        </tr>
-        <tr>
-          <td>Humidity</td>
-          <td><span id ="BMEHum" >---%</span></td>
-        </tr>
-      </table>
+            <tr>
+                <th>MEASUREMENT</th>
+                <th>VALUE</th>
+            </tr>
+            <tr>
+                <td>Temp. Celsius</td>
+                <td> <span id="BMETemp">---C</span></td>
+            </tr>
+            <tr>
+                <td>Pressure</td>
+                <td><span id="BMEPre">--- hPa</span></td>
+            </tr>
+            <tr>
+                <td>Humidity</td>
+                <td><span id="BMEHum">---%</span></td>
+            </tr>
+        </table>
     </div>
 
-<div class="wrapper">
-    <input type="radio" name="water" class="water--0" id="r0" checked>
-    <label for="r0">empty</label>
-    <input type="radio" name="water" class="water--12" id="r1" >
-    <label for="r1">12.5%</label>
-    <input type="radio" name="water" class="water--25" id="r2">
-    <label for="r2">25%</label>
-    <input type="radio" name="water" class="water--50" id="r3">
-    <label for="r3">50%</label>
-    <input type="radio" name="water" class="water--75" id="r4">
-    <label for="r4">75%</label>
-    <input type="radio" name="water" class="water--100" id="r5">
-    <label for="r5">100%</label>
+    <div class="wrapper">
+        <input type="radio" name="water" class="water--0" id="r0" checked>
+        <label for="r0">empty</label>
+        <input type="radio" name="water" class="water--12" id="r1">
+        <label for="r1">12.5%</label>
+        <input type="radio" name="water" class="water--25" id="r2">
+        <label for="r2">25%</label>
+        <input type="radio" name="water" class="water--50" id="r3">
+        <label for="r3">50%</label>
+        <input type="radio" name="water" class="water--75" id="r4">
+        <label for="r4">75%</label>
+        <input type="radio" name="water" class="water--100" id="r5">
+        <label for="r5">100%</label>
 
-    <div class="cylinder">
-        <div class="water"></div>
+        <div class="cylinder">
+            <div class="water"></div>
+        </div>
     </div>
-</div>
 
-    </section>
-
+</section>
 
 
-    <script>
-        var url = "ws://10.10.1.68:1337/";
-        var output;
-        var button;
-        var canvas;
-        var context;
-        var cons;
 
-        setInterval(function () {
-            getTemperature();
-            getHumidity();
-            getPressure();
-            doSend("getLEDState");
-            setTimeout(function () {
-                getWaterLevel();
+<script>
+    var url = "ws://10.10.1.68:1337/";
+    var output;
+    var button;
+    var canvas;
+    var context;
+    var cons;
 
-            }, 50);
+    setInterval(function () {
+        getTemperature();
+        getHumidity();
+        getPressure();
+        doSend("getLEDState");
+        setTimeout(function () {
+            getWaterLevel();
 
-        }, 5000);
+        }, 50);
 
-      
+    }, 5000);
+
+
 
     // This is called when the page finishes loading
     function init() {
@@ -274,17 +286,17 @@ input {
         // Connect to WebSocket server
         websocket = new WebSocket(url);
         // Assign callbacks
-        websocket.onopen = function(evt) { onOpen(evt) };
-        websocket.onclose = function(evt) { onClose(evt) };
-        websocket.onmessage = function(evt) { onMessage(evt) };
-        websocket.onerror = function(evt) { onError(evt) };
+        websocket.onopen = function (evt) { onOpen(evt) };
+        websocket.onclose = function (evt) { onClose(evt) };
+        websocket.onmessage = function (evt) { onMessage(evt) };
+        websocket.onerror = function (evt) { onError(evt) };
 
     }
 
     // Called when a WebSocket connection is established with the server
-        function onOpen(evt) {
-        
-        //delays system response and dosend so connection can cath up 
+    function onOpen(evt) {
+
+        //delays system response and dosend so connection can cath up
         delayedGreeting();
 
         // Log connection state
@@ -295,7 +307,7 @@ input {
 
         // Get the current state of the LED
         doSend("getLEDState");
-    } 
+    }
 
     // Called when the WebSocket connection is closed
     function onClose(evt) {
@@ -307,7 +319,7 @@ input {
         button.disabled = true;
 
         // Try to reconnect after a few seconds
-        setTimeout(function() { wsConnect(url) }, 2000);
+        setTimeout(function () { wsConnect(url) }, 2000);
     }
 
     // Called when a message is received from the server
@@ -316,7 +328,7 @@ input {
         console.log("Received: " + evt.data);
 
         // Update circle graphic with LED state
-        switch(evt.data) {
+        switch (evt.data) {
             case "0":
                 console.log("LED is off");
                 context.fillStyle = "red";
@@ -364,20 +376,20 @@ input {
                             setWaterLevel("r5");
                         } else if (obj.value == "Level_error") {
                             console.log("Water level is on " + obj.value);
-                           // alert("Water level sensor readings is whrong check sensors" + obj.value);
+                            // alert("Water level sensor readings is whrong check sensors" + obj.value);
                         }
-                        
+
                         break;
-                break;
+                        break;
+                }
         }
-    }
 
-    // Called when a WebSocket error occurs
-    function onError(evt) {
-        console.log("ERROR: " + evt.data);
-    }
+        // Called when a WebSocket error occurs
+        function onError(evt) {
+            console.log("ERROR: " + evt.data);
+        }
 
-    // Sends a message to the server (and prints it to the console)
+        // Sends a message to the server (and prints it to the console)
         function doSend(message) {
             try {
                 console.log("Sending: " + message);
@@ -387,65 +399,65 @@ input {
                 // Try to reconnect after a few seconds
                 setTimeout(function () { wsConnect(url) }, 2000);
             }
-  
-    }
 
-    // Called whenever the HTML button is pressed
-    function onPress() {
-        doSend("toggleLED");
-        doSend("getLEDState");
         }
 
-    function sleep(ms) {
-        return new Promise(
-            resolve => setTimeout(resolve, ms)
-        );
-    }
+        // Called whenever the HTML button is pressed
+        function onPress() {
+            doSend("toggleLED");
+            doSend("getLEDState");
+        }
 
-    async function delayedGreeting() {
-        console.log("Hello");
-        await sleep(2000);
-        console.log("World!");
-        await sleep(2000);
-        console.log("Goodbye!");
-    }
+        function sleep(ms) {
+            return new Promise(
+                resolve => setTimeout(resolve, ms)
+            );
+        }
 
-    //Calles 
-    function getTemperature() {
-        var message = "/getTemperature";
-        console.log("Sending: " + message);
-        //websocket.send(message);
+        async function delayedGreeting() {
+            console.log("Hello");
+            await sleep(2000);
+            console.log("World!");
+            await sleep(2000);
+            console.log("Goodbye!");
+        }
 
-        doSend(message);
-        //onMessage
-    }
-    function getHumidity() {
-        var message = "/getHumidity";
-        console.log("Sending: " + message);
-        websocket.send(message);
-        //doSend("/getHumidity");
-        //onMessage
-    }
-    function getPressure() {
-        var message = "/getPressure";
-        console.log("Sending: " + message);
-        //websocket.send(message);
-        doSend(message);
-        onMessage
-    }
-    function getWaterLevel() {
-        var message = "/getWaterLevel";
-        console.log("Sending: " + message);
-        websocket.send(message);
-    }
+        //Calles
+        function getTemperature() {
+            var message = "/getTemperature";
+            console.log("Sending: " + message);
+            //websocket.send(message);
 
-    function setWaterLevel(parameter1) {
+            doSend(message);
+            //onMessage
+        }
+        function getHumidity() {
+            var message = "/getHumidity";
+            console.log("Sending: " + message);
+            websocket.send(message);
+            //doSend("/getHumidity");
+            //onMessage
+        }
+        function getPressure() {
+            var message = "/getPressure";
+            console.log("Sending: " + message);
+            //websocket.send(message);
+            doSend(message);
+            onMessage
+        }
+        function getWaterLevel() {
+            var message = "/getWaterLevel";
+            console.log("Sending: " + message);
+            websocket.send(message);
+        }
+
+        function setWaterLevel(parameter1) {
             radiobtn = document.getElementById(parameter1);
             radiobtn.checked = true;
-    }
+        }
 
-       
 
-    // Call the init function as soon as the page loads
-    window.addEventListener("load", init, false);
-    </script>
+
+        // Call the init function as soon as the page loads
+        window.addEventListener("load", init, false);
+</script>
