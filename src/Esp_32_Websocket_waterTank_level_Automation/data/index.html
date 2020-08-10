@@ -233,22 +233,19 @@ input {
         var context;
         var cons;
 
-
-
         setInterval(function () {
             getTemperature();
             getHumidity();
             getPressure();
             doSend("getLEDState");
-            //doSend("/getWaterLevel");
-            
             setTimeout(function () {
-            getWaterLevel();
+                getWaterLevel();
 
             }, 50);
 
         }, 5000);
 
+      
 
     // This is called when the page finishes loading
     function init() {
@@ -276,7 +273,6 @@ input {
 
         // Connect to WebSocket server
         websocket = new WebSocket(url);
-
         // Assign callbacks
         websocket.onopen = function(evt) { onOpen(evt) };
         websocket.onclose = function(evt) { onClose(evt) };
@@ -286,7 +282,10 @@ input {
     }
 
     // Called when a WebSocket connection is established with the server
-    function onOpen(evt) {
+        function onOpen(evt) {
+        
+        //delays system response and dosend so connection can cath up 
+        delayedGreeting();
 
         // Log connection state
         console.log("Connected");
@@ -313,11 +312,8 @@ input {
 
     // Called when a message is received from the server
     function onMessage(evt) {
-        var dataMSG;
         // Print out our received message
         console.log("Received: " + evt.data);
-        dataMSG = " " + evt.data;
-        dataRV = evt.data;
 
         // Update circle graphic with LED state
         switch(evt.data) {
@@ -425,37 +421,48 @@ input {
     }
 
     // Sends a message to the server (and prints it to the console)
-    function doSend(message) {
-        console.log("Sending: " + message);
-        websocket.send(message);
+        function doSend(message) {
+            try {
+                console.log("Sending: " + message);
+                websocket.send(message);
+            }
+            catch (err) {
+                // Try to reconnect after a few seconds
+                setTimeout(function () { wsConnect(url) }, 2000);
+            }
+  
     }
 
     // Called whenever the HTML button is pressed
     function onPress() {
         doSend("toggleLED");
         doSend("getLEDState");
+        }
 
+    function sleep(ms) {
+        return new Promise(
+            resolve => setTimeout(resolve, ms)
+        );
     }
 
-    function getData() {
-        //doSend("getTempData");
-        //onMessage
-        var message = "/getDATA";
-        console.log("Sending: " + message);
-        websocket.send(message);
-
+    async function delayedGreeting() {
+        console.log("Hello");
+        await sleep(2000);
+        console.log("World!");
+        await sleep(2000);
+        console.log("Goodbye!");
     }
+
+    //Calles 
     function getTemperature() {
-        var tempera = 0;
         var message = "/getTemperature";
         console.log("Sending: " + message);
-        websocket.send(message);
+        //websocket.send(message);
 
-        //doSend("getTempData");
+        doSend(message);
         //onMessage
     }
     function getHumidity() {
-        var hyms = 0;
         var message = "/getHumidity";
         console.log("Sending: " + message);
         websocket.send(message);
@@ -478,10 +485,9 @@ input {
     function setWaterLevel(parameter1) {
             radiobtn = document.getElementById(parameter1);
             radiobtn.checked = true;
-
-           //var //radiobtn = document.getElementById("theid");
-            //radiobtn.checked = true;
     }
+
+       
 
     // Call the init function as soon as the page loads
     window.addEventListener("load", init, false);
