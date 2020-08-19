@@ -6,12 +6,21 @@
 //             Year:    2020                                   //
 /////////////////////////////////////////////////////////////////
 
-/*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //                   source:                                                                                                   //
   // https://shawnhymel.com/1882/how-to-create-a-web-server-with-websockets-using-an-esp32-in-arduino/                           //
   //                                                                                                                             //
+  // https://lastminuteengineers.com/handling-esp32-gpio-interrupts-tutorial/ this need to implenment at later stage             //
   //                                                                                                                             //
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+/*Notes
+   der mangler test af ekstr sensor til tank 2 så den stopper som den skal og fylder når den den.
+   der skal laves ota upload
+
+   der skal lave
+
+*/
 
 
 #include <WiFi.h>
@@ -22,9 +31,6 @@
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
 #include <ArduinoJson.h>
-
-
-
 
 /***********************************************************
    variables
@@ -47,11 +53,20 @@ unsigned long delayTime;
 //switch pin
 const int toggleSwitch_pin = 26;
 
+
+int buttonState      = 0;     // current state of the button
+int lastButtonState  = 0;     // previous state of the button
+
+
+
+
+
 //relay pins
 const int relay_1_pin = 33;
 const int relay_2_pin = 25;
 
 int relay_state = 0;
+int lastRelay_state = 0;
 bool relayState;
 bool relaySafeToUse;
 
@@ -69,6 +84,14 @@ const int tankFloating_sen_2 = 39;
 const int tankFloating_sen_3 = 34;
 const int tankFloating_sen_4 = 35;
 const int tankFloating_sen_5 = 32;
+
+// pin 14 /13 / 27 free pins
+
+//water level sensons pins 2 tank
+const int tankFloating_2_sen_1 = 27;
+const int tankFloating_2_sen_2 = 14;
+const int tankFloating_2_sen_3 = 13;
+
 
 //Waterlevel sensor values
 int sensorOn = 2400 ; //700 old
@@ -384,6 +407,7 @@ void onWebSocketEvent(uint8_t client_num,
       } else if ( strcmp((char *)payload, "getLEDState") == 0 ) {
         sprintf(msg_buf, "%d", relay_state);
         Serial.printf("Sending to [%u]: %s\n", client_num, msg_buf);
+
         webSocket.sendTXT(client_num, msg_buf);
 
       } else if (strcmp((char *)payload, "/getTemperature") == 0)  {
@@ -500,6 +524,8 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 
 
 void setup() {
+
+
 
   //Init Switch
   pinMode(toggleSwitch_pin, INPUT);
@@ -633,8 +659,7 @@ void setup() {
                   Adafruit_BME280::SAMPLING_X16,  // temperature
                   Adafruit_BME280::SAMPLING_X16, // pressure
                   Adafruit_BME280::SAMPLING_X16,  // humidity
-                  Adafruit_BME280::FILTER_X16,
-                  Adafruit_BME280::STANDBY_MS_0_5 );
+                  Adafruit_BME280::FILTER_X16,                 Adafruit_BME280::STANDBY_MS_0_5 );
 
   // suggested rate is 25Hz
   // 1 + (2 * T_ovs) + (2 * P_ovs + 0.5) + (2 * H_ovs + 0.5)
@@ -657,8 +682,9 @@ void loop() {
 
   // Look for and handle WebSocket data
   webSocket.loop();
-
+  //Checks were sensors is at and  sets level values og make sure there is water when the pump runs
   tankLevelCheck();
+  //Print all sensor values as fast as serial
   if (debugPrint) {
     if (currentMillis - previousMillis >= interval) {
       // save the last time sent to serial;
@@ -672,34 +698,31 @@ void loop() {
     }
   }
 
-  /*
-     the if stament checks if relaySafeToUse = " if there water in main tank"  and if
+  // read the Switchs input pin
+  buttonState = digitalRead(toggleSwitch_pin);
 
-  */
+  if (buttonState != lastButtonState) {
 
-  if (digitalRead(toggleSwitch_pin) == HIGH && relaySafeToUse == true && isWaterTankFull == false) {
-    if (debugPrint) {
+    // change the state of the led when someone flip the switch
+    if (buttonState == 1 && relaySafeToUse == true && isWaterTankFull == false) {
       Serial.println("Switching ON");
-    }
-    relay_state = 1;
-  }
-  if (digitalRead(toggleSwitch_pin) == LOW && relaySafeToUse == true) {
-
-    if (debugPrint) {
+      relay_state = 1;
+    } else if (buttonState == LOW) {
       Serial.println("Switching OFF");
+      relay_state = 0;
     }
-    relay_state = 0;
+    // remember the current state of the button
+    lastButtonState = buttonState;
   }
+
 
   if (relay_state > 0 && relaySafeToUse == true && isWaterTankFull == false) {
     if (debugPrint) {
       Serial.println("ON");
     }
-    //    relay_state = 1;
     digitalWrite(relay_1_pin, HIGH); // HIGH tænder
     digitalWrite(relay_2_pin, HIGH); // HIGH tænder
   } else {
-    //    relay_state = 0;
     if (debugPrint) {
       Serial.println("OFF");
     }
