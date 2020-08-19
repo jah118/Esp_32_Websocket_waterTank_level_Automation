@@ -37,7 +37,7 @@
 ************************************************************/
 
 // debug if true prints data to Serial
-bool debugPrint = false; //
+bool debugPrint = false;                 //print values to serial
 
 // makes sure serial is not spammed
 unsigned long previousMillis = 0;        // will store last time it was updated
@@ -53,22 +53,15 @@ unsigned long delayTime;
 //switch pin
 const int toggleSwitch_pin = 26;
 
-
 int buttonState      = 0;     // current state of the button
 int lastButtonState  = 0;     // previous state of the button
-
-
-
-
 
 //relay pins
 const int relay_1_pin = 33;
 const int relay_2_pin = 25;
 
 int relay_state = 0;
-int lastRelay_state = 0;
-bool relayState;
-bool relaySafeToUse;
+bool relaySafeToUse = false;
 
 
 //Led pins
@@ -85,14 +78,6 @@ const int tankFloating_sen_3 = 34;
 const int tankFloating_sen_4 = 35;
 const int tankFloating_sen_5 = 32;
 
-// pin 14 /13 / 27 free pins
-
-//water level sensons pins 2 tank
-const int tankFloating_2_sen_1 = 27;
-const int tankFloating_2_sen_2 = 14;
-const int tankFloating_2_sen_3 = 13;
-
-
 //Waterlevel sensor values
 int sensorOn = 2400 ; //700 old
 int tankSensorValue1_1 = 0;
@@ -106,6 +91,13 @@ String waterLevelState = "Level_0";
 
 //WaterLevel 2 tanks state
 bool isWaterTankFull = false; // ------------------------------ dette er til andet sæt af sensor i 2 tank og den systemere.
+
+// pin 14 /13 / 27 free pins
+
+//water level sensons pins 2 tank
+const int tankFloating_2_sen_1 = 27;
+const int tankFloating_2_sen_2 = 14;
+const int tankFloating_2_sen_3 = 13;
 
 //Wifi
 const char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
@@ -158,7 +150,6 @@ void tankLevelCheck () {
 
   if (tankSensorValue1_1 < sensorOn ) {
     relay_state = 0;
-    relayState = false;
     relaySafeToUse  = false;
     if (currentMillis - previousMillis >= interval) {
       // save the last time sent to serial;
@@ -169,7 +160,6 @@ void tankLevelCheck () {
 
   if (tankSensorValue1_1 < sensorOn && tankSensorValue1_2 < sensorOn ) {
     relay_state = 0;
-    relayState = false;
     relaySafeToUse  = false;
     waterLevelState = "Level_0";
     digitalWrite(led_1_pin, LOW);
@@ -185,7 +175,6 @@ void tankLevelCheck () {
 
   } else if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 < sensorOn  && tankSensorValue1_3 < sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
     //relay_state = 0;
-    //relayState = false;
     relaySafeToUse  = true;
     waterLevelState = "Level_12.5";
     digitalWrite(led_1_pin, HIGH);
@@ -215,8 +204,6 @@ void tankLevelCheck () {
     }
 
   } else  if (tankSensorValue1_1 > sensorOn && tankSensorValue1_2 > sensorOn  && tankSensorValue1_3 > sensorOn && tankSensorValue1_4 < sensorOn && tankSensorValue1_5 < sensorOn) {
-    //relay_state = 1; // only for testing -----------------------------
-    // relayState = true; // only for testing -----------------------------
     relaySafeToUse  = true;
     waterLevelState = "Level_50";
     digitalWrite(led_1_pin, HIGH);
@@ -288,6 +275,8 @@ void tankLevelCheck () {
 
 //----------------------------------------------------------------------\\
 
+
+//Read Temperature sensor and returns values as a string.
 String readBME280Temperature() {
   // Read temperature as Celsius (the default)
   float t = bme.readTemperature();
@@ -298,11 +287,11 @@ String readBME280Temperature() {
     return "";
   }
   else {
-    // Serial.println(t);
     return String(t);
   }
 }
 
+//Read Humidity sensor and returns values as a string.
 String readBME280Humidity() {
   float h = bme.readHumidity();
   if (isnan(h)) {
@@ -310,11 +299,11 @@ String readBME280Humidity() {
     return "";
   }
   else {
-    //Serial.println(h);
     return String(h);
   }
 }
 
+//Read Pressure sensor and returns values as a string.
 String readBME280Pressure() {
   float p = bme.readPressure() / 100.0F;
   if (isnan(p)) {
@@ -322,17 +311,10 @@ String readBME280Pressure() {
     return "";
   }
   else {
-    //Serial.println(p);
     return String(p);
   }
 }
 
-void printSensor() {
-  delay(1000);
-  Serial.println(readBME280Temperature());
-  Serial.println(readBME280Humidity());
-  Serial.println(readBME280Pressure());
-}
 
 void printBMEValues() {
   delay(1000);
@@ -678,23 +660,26 @@ void setup() {
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
-
   // Look for and handle WebSocket data
   webSocket.loop();
   //Checks were sensors is at and  sets level values og make sure there is water when the pump runs
   tankLevelCheck();
   //Print all sensor values as fast as serial
   if (debugPrint) {
+    // currentMillis varible is used to keep count of time passed so  serial is not spammed
+    unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
       // save the last time sent to serial;
       previousMillis = currentMillis;
       printTankLevelSensorValue(); // debug for senvalues
       printBMEValues();
       delay(delayTime);
-
-      Serial.println(relayState);
-      Serial.println("state is " + relay_state);
+      bool cState = relay_state;
+      if (relay_state > 0 ) {
+        Serial.println("state is  ON");
+      } else {
+        Serial.println("state is  OFF");
+      }
     }
   }
 
@@ -715,17 +700,11 @@ void loop() {
     lastButtonState = buttonState;
   }
 
-
+  //Change the state of the relays 
   if (relay_state > 0 && relaySafeToUse == true && isWaterTankFull == false) {
-    if (debugPrint) {
-      Serial.println("ON");
-    }
     digitalWrite(relay_1_pin, HIGH); // HIGH tænder
     digitalWrite(relay_2_pin, HIGH); // HIGH tænder
   } else {
-    if (debugPrint) {
-      Serial.println("OFF");
-    }
     digitalWrite(relay_1_pin, LOW); // LOW slukker
     digitalWrite(relay_2_pin, LOW); // LOW slukker
   }
