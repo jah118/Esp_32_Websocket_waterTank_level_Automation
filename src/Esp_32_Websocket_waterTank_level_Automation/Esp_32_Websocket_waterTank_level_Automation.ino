@@ -37,7 +37,8 @@
 ************************************************************/
 
 // debug if true prints data to Serial
-bool debugPrint = false;                 //print values to serial
+bool debugState = false;                 //print values to serial
+
 
 // makes sure serial is not spammed
 unsigned long previousMillis = 0;        // will store last time it was updated
@@ -114,6 +115,15 @@ char msg_buf[10];
 /***********************************************************
    Functions
 ************************************************************/
+
+//--------Debug print Functions --------//
+
+void isDebugTruePrintToSerialType_1(String temp) {
+  if (debugState) {
+    Serial.println(temp);
+  }
+}
+
 
 //--------WaterLevel / sensor Functions --------//
 
@@ -269,7 +279,6 @@ void tankLevelCheck () {
     digitalWrite(led_3_pin, LOW);
     digitalWrite(led_4_pin, LOW);
     digitalWrite(led_5_pin, LOW);
-    Serial.println("sensor error");
   }
 }
 
@@ -501,6 +510,29 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 }
 
 /***********************************************************
+                          debug
+************************************************************/
+
+void debugPriting(bool b) {
+  // currentMillis varible is used to keep count of time passed so  serial is not spammed
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    // save the last time sent to serial;
+    previousMillis = currentMillis;
+    printTankLevelSensorValue(); // debug for senvalues
+    printBMEValues();
+    delay(delayTime);
+    bool cState = relay_state;
+    if (relay_state > 0 ) {
+      Serial.println("state is  ON");
+    } else {
+      Serial.println("state is  OFF");
+    }
+  }
+}
+
+
+/***********************************************************
                           Main
 ************************************************************/
 
@@ -578,7 +610,8 @@ void setup() {
 
   // Handle requests for pages that do not exist
   server.onNotFound(onPageNotFound);
-  // noty use as server is the same as were data is created, so same data.
+
+  // not use as server is the same as were data is created, so same data.
   //  server.on("/getTemperature", HTTP_GET, [](AsyncWebServerRequest * request) {
   //    request->send_P(200, "text/plain", readBME280Temperature().c_str());
   //  });
@@ -595,7 +628,7 @@ void setup() {
     if (request->hasParam(PARAM_MESSAGE)) {
       message = request->getParam(PARAM_MESSAGE)->value();
     } else {
-      message = "No message sent";
+      message = "No message sent ... RIP";
     }
     request->send(200, "text/plain", "Hello, GET: " + message);
   });
@@ -606,10 +639,13 @@ void setup() {
     if (request->hasParam(PARAM_MESSAGE, true)) {
       message = request->getParam(PARAM_MESSAGE, true)->value();
     } else {
-      message = "No message sent";
+      message = "No message sent ... RIP";
     }
     request->send(200, "text/plain", "Hello, POST: " + message);
   });
+
+
+  //TODO Create /post for all sensors and add /put to loop for update\\
 
   //handle error and runs funktion notFopund
   server.onNotFound(notFound);
@@ -662,34 +698,20 @@ void setup() {
 void loop() {
   // Look for and handle WebSocket data
   webSocket.loop();
+
   //Checks were sensors is at and  sets level values og make sure there is water when the pump runs
   tankLevelCheck();
-  //Print all sensor values as fast as serial
-  if (debugPrint) {
-    // currentMillis varible is used to keep count of time passed so  serial is not spammed
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) {
-      // save the last time sent to serial;
-      previousMillis = currentMillis;
-      printTankLevelSensorValue(); // debug for senvalues
-      printBMEValues();
-      delay(delayTime);
-      bool cState = relay_state;
-      if (relay_state > 0 ) {
-        Serial.println("state is  ON");
-      } else {
-        Serial.println("state is  OFF");
-      }
-    }
-  }
 
-  // read the Switchs input pin
-  buttonState = digitalRead(toggleSwitch_pin);
+  //Print all sensor values as fast as serial
+  debugPriting(debugPrint;
+
+               // read the Switchs input pin
+               buttonState = digitalRead(toggleSwitch_pin);
 
   if (buttonState != lastButtonState) {
 
-    // change the state of the led when someone flip the switch
-    if (buttonState == 1 && relaySafeToUse == true && isWaterTankFull == false) {
+  // change the state of the led when someone flip the switch
+  if (buttonState == 1 && relaySafeToUse == true && isWaterTankFull == false) {
       Serial.println("Switching ON");
       relay_state = 1;
     } else if (buttonState == LOW) {
@@ -700,9 +722,9 @@ void loop() {
     lastButtonState = buttonState;
   }
 
-  //Change the state of the relays 
+  //Change the state of the relays
   if (relay_state > 0 && relaySafeToUse == true && isWaterTankFull == false) {
-    digitalWrite(relay_1_pin, HIGH); // HIGH tænder
+  digitalWrite(relay_1_pin, HIGH); // HIGH tænder
     digitalWrite(relay_2_pin, HIGH); // HIGH tænder
   } else {
     digitalWrite(relay_1_pin, LOW); // LOW slukker
