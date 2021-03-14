@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="switch.css">
+    <meta charset="utf-8" />
+    <title>WebSocket Test</title>
+</head>
+
+<body>
+    <h1>Water Level Control</h1>
+    <section>
+        <div class="wrapper">
+            <h2>Skur information</h2>
+            <table>
+                <tr>
+                    <div>
+                        <!-- <td><button id="toggleButton" onclick="onPress()" disabled>Toggle Relay</button></td> -->
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" id="toggleButton" onclick="onPress()">
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td><canvas id="led" width="50" height="50"></canvas></td>
+                    </div>
+                </tr>
+                <tr>
+                    <td>Temp. Celsius</td>
+                    <td> <span id="BMETemp">---C</span></td>
+                </tr>
+                <tr>
+                    <td>Pressure</td>
+                    <td><span id="BMEPre">--- hPa</span></td>
+                </tr>
+                <tr>
+                    <td>Humidity</td>
+                    <td><span id="BMEHum">---%</span></td>
+                </tr>
+            </table>
+            <h2>Tank information</h2>
+            <table>
+                <tr>
+                    <th>Vandtank temp:</th>
+                    <th><span id="TankTemp">---C</span></th>
+                </tr>
+            </table>
+        </div>
+
+        <div class="wrapper">
+            <h2>Tank niveau</h2>
+            <input type="radio" name="water" class="water--0" id="r0" checked>
+            <label for="r0">empty</label>
+            <input type="radio" name="water" class="water--12" id="r1">
+            <label for="r1">12.5%</label>
+            <input type="radio" name="water" class="water--25" id="r2">
+            <label for="r2">25%</label>
+            <input type="radio" name="water" class="water--50" id="r3">
+            <label for="r3">50%</label>
+            <input type="radio" name="water" class="water--75" id="r4">
+            <label for="r4">75%</label>
+            <input type="radio" name="water" class="water--100" id="r5">
+            <label for="r5">100%</label>
+
+            <div class="cylinder">
+                <div class="water"></div>
+            </div>
+        </div>
+
+    </section>
+    <div>
+        <h2>Console</h2>
+        <!-- TODO at later stage build log out put for status of data for more debuging  -->
+        <!-- one way to do it => https://alorel.github.io/console-log-html/  -->
+    </div>
+</body>
+<script>
+    var url = "ws://10.10.1.112:1337/";
+    var output;
+    var button;
+    var canvas;
+    var context;
+    var cons;
+    var waterLevel;
+
+
+    setInterval(function () {
+        getTemperature();
+        getHumidity();
+        getPressure();
+        doSend("getLEDState");
+        setTimeout(function () {
+            getWaterLevel();
+        }, 50);
+
+    }, 5000);
+
+
+    // This is called when the page finishes loading
+    function init() {
+
+        // Assign page elements to variables
+        button = document.getElementById("toggleButton");
+        output = document.getElementById("output");
+        canvas = document.getElementById("led");
+
+        // Draw circle in canvas
+        context = canvas.getContext("2d");
+        context.arc(25, 25, 15, 0, Math.PI * 2, false);
+        context.lineWidth = 3;
+        context.strokeStyle = "black";
+        context.stroke();
+        context.fillStyle = "black";
+        context.fill();
+
+        // Connect to WebSocket server
+        wsConnect(url);
+    }
+
+    // Call this to connect to the WebSocket server
+    function wsConnect(url) {
+
+        // Connect to WebSocket server
+        websocket = new WebSocket(url);
+        // Assign callbacks
+        websocket.onopen = function (evt) { onOpen(evt) };
+        websocket.onclose = function (evt) { onClose(evt) };
+        websocket.onmessage = function (evt) { onMessage(evt) };
+        websocket.onerror = function (evt) { onError(evt) };
+
+    }
+
+    // Called when a WebSocket connection is established with the server
+    function onOpen(evt) {
+
+        //delays system response and dosend so connection can cath up 
+        delayedGreeting();
+
+        // Log connection state
+        console.log("Connected");
+
+        // Enable button
+        button.disabled = false;
+
+        // Get the current state of the LED
+        doSend("getLEDState");
+    }
+
+    // Called when the WebSocket connection is closed
+    function onClose(evt) {
+
+        // Log disconnection state
+        console.log("Disconnected");
+
+        // Disable button
+        button.disabled = true;
+
+        // Try to reconnect after a few seconds
+        setTimeout(function () { wsConnect(url) }, 2000);
+    }
+
+    // Called when a message is received from the server
+    function onMessage(evt) {
+        // Print out our received message
+        console.log("Received: " + evt.data);
+
+        // Update circle graphic with LED state
+        switch (evt.data) {
+            case "0":
+                console.log("LED is off");
+                document.getElementById("toggleButton").checked = false;
+                context.fillStyle = "red";
+                context.fill();
+                break;
+            case "1":
+                console.log("LED is on");
+                context.fillStyle = "green";
+                context.fill();
+                break;
+
+            default:
+                var json = evt.data;
+                var obj = JSON.parse(json);
+                console.log(obj.SensorType);
+                console.log(obj.value);
+
+                switch (obj["SensorType"]) {
+                    case "Temperature":
+                        console.log("Received: temp ");
+                        document.getElementById("BMETemp").innerHTML = obj.value + "°C";
+                        break;
+                    case "Humidity":
+                        console.log("Received: hum ");
+                        document.getElementById("BMEHum").innerHTML = obj.value + "%";
+                        break;
+                    case "Pressure":
+                        console.log("Received: pre ");
+                        document.getElementById("BMEPre").innerHTML = obj.value + "hPa";
+                        break;
+                    case "Water Level":
+                        console.log("Water level is on " + obj.value);
+
+                        if (obj.value == "Level_0") {
+                            setWaterLevel("r0");
+                        } else if (obj.value == "Level_12.5") {
+                            setWaterLevel("r1");
+                        } else if (obj.value == "Level_25") {
+                            setWaterLevel("r2");
+                        } else if (obj.value == "Level_50") {
+                            setWaterLevel("r3");
+                        } else if (obj.value == "Level_75") {
+                            setWaterLevel("r4");
+                        } else if (obj.value == "Level_100") {
+                            setWaterLevel("r5");
+                        } else if (obj.value == "Level_error") {
+                            console.log("Water level is on " + obj.value);
+                            // alert("Water level sensor readings is whrong check sensors" + obj.value);
+                        }
+                        break;
+                }
+        }
+    }
+
+    // Called when a WebSocket error occurs
+    function onError(evt) {
+        console.log("ERROR: " + evt.data);
+    }
+
+    // Sends a message to the server (and prints it to the console)
+    function doSend(message) {
+        try {
+            console.log("Sending: " + message);
+            websocket.send(message);
+        }
+        catch (err) {
+            // Try to reconnect after a few seconds
+            setTimeout(function () { wsConnect(url) }, 2000);
+        }
+    }
+
+    // Called whenever the HTML button is pressed
+    function onPress() {
+        doSend("toggleLED");
+        doSend("getLEDState");
+    }
+
+    function sleep(ms) {
+        return new Promise(
+            resolve => setTimeout(resolve, ms)
+        );
+    }
+
+    async function delayedGreeting() {
+        console.log("Hello");
+        await sleep(2000);
+        console.log("World!");
+        await sleep(2000);
+        console.log("Goodbye!");
+    }
+
+    //Calles 
+    function getTemperature() {
+        var message = "/getTemperature";
+        console.log("Sending: " + message);
+        doSend(message);
+    }
+
+    function getHumidity() {
+        var message = "/getHumidity";
+        console.log("Sending: " + message);
+        //websocket.send(message);
+        doSend(message);
+    }
+
+    function getPressure() {
+        var message = "/getPressure";
+        console.log("Sending: " + message);
+        //websocket.send(message);
+        doSend(message);
+    }
+
+    function getWaterLevel() {
+        var message = "/getWaterLevel";
+        console.log("Sending: " + message);
+        waterLevel = message;
+        websocket.send(message);
+    }
+
+    function setWaterLevel(parameter1) {
+        radiobtn = document.getElementById(parameter1);
+        radiobtn.checked = true;
+    }
+
+    // Call the init function as soon as the page loads
+    window.addEventListener("load", init, false);
+</script>

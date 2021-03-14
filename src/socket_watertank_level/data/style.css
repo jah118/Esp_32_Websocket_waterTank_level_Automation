@@ -1,0 +1,162 @@
+section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  section .wrapper {
+    margin: 70px 50px 0 50px;
+  }
+      body {
+      padding: 50px 0;
+      text-align: center;
+      font-family: "Trebuchet MS", Arial;
+  }
+   
+  input {
+      margin-bottom: 30px;
+  }
+   
+  .cylinder {
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+      width: 100px;
+      height: 300px;
+      border-radius: 50px/25px;
+      background-color: rgba(160, 160, 160, 0.5);
+  }
+   
+  .cylinder:before {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100px;
+      height: 50px;
+      border-radius: 50px/25px;
+      background-color: rgba(160, 160, 160, 0.2);
+      content: '';
+  }
+   
+  .cylinder:after {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100px;
+      height: 50px;
+      border-radius: 50px/25px;
+      background-color: rgba(160, 160, 160, 0.4);
+      content: '';
+  }
+   
+  .water {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100px;
+      height: 0;
+      padding-top: 50px;
+      border-radius: 50px/25px;
+      background-color: rgba(0, 160, 160, 0.5);
+      transition: 0.3s linear;
+  }
+   
+  .water:before {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100px;
+      height: 50px;
+      border-radius: 50px/25px;
+      background-color: rgba(0, 160, 160, 0.2);
+      content: '';
+  }
+   
+  .water:after {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100px;
+      height: 50px;
+      border-radius: 50px/25px;
+      background-color: rgba(0, 160, 160, 0.4);
+      content: '';
+  }
+   
+  .water--0:checked ~ .cylinder .water {
+      bottom: -50px;
+  }
+  
+  .water--12:checked ~ .cylinder .water {
+      height: calc(250px * 0.12.5);
+  }
+   
+  .water--25:checked ~ .cylinder .water {
+      height: calc(250px * 0.25);
+  }
+   
+  .water--50:checked ~ .cylinder .water {
+      height: calc(250px * 0.5);
+  }
+  .water--75:checked ~ .cylinder .water {
+      height: calc(250px * 0.75);
+  }
+   
+  .water--100:checked ~ .cylinder .water {
+      height: calc(250px * 0.999);
+  }
+     
+      table {
+        border-collapse: collapse;
+        margin-left:auto;
+        margin-right:auto;
+      }
+      th {
+        padding: 12px;
+        background-color: #0043af;
+        color: white;
+      }
+      tr {
+        border: 1px solid #ddd;
+        padding: 12px;
+      }
+      tr:hover {
+        background-color: #bcbcbc;
+      }
+      td {
+        border: none; padding: 12px;
+      }
+      .sensor {
+        color:white;
+        font-weight: bold;
+        background-color: #bcbcbc;
+        padding: 1px;
+      }
+  
+      table {
+        border-collapse: collapse;
+        margin-left:auto;
+        margin-right:auto;
+      }
+      th {
+        padding: 12px;
+        background-color: #0043af;
+        color: white;
+      }
+      tr {
+        border: 1px solid #ddd;
+        padding: 12px;
+      }
+      tr:hover {
+        background-color: #bcbcbc;
+      }
+      td {
+        border: none; padding: 12px;
+      }
+      .sensor {
+          color: white;
+          font-weight: bold;
+          background-color: #bcbcbc;
+          padding: 1px;
+      }
