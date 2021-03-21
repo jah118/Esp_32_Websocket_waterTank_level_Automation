@@ -77,7 +77,7 @@ const int tankFloating_sen_4 = 35;
 const int tankFloating_sen_5 = 32;
 
 //Waterlevel sensor values
-int sensorOn = 2400; //700 old
+int sensorOn = 2400; //700 old 
 int tankSensorValue1_1 = 0;
 int tankSensorValue1_2 = 0;
 int tankSensorValue1_3 = 0;
@@ -99,8 +99,8 @@ const int tankFloating_2_sen_2 = 14;
 const int tankFloating_2_sen_3 = 13;
 
 //Wifi
-const char *ssid = "Anet"; //_TP-LINK
-const char *password = "@PoulThomsen";
+const char *ssid = "ssid"; //_TP-LINK
+const char *password = "password";
 
 IPAddress local_IP(10, 10, 1, 112); // Set your Static IP address
 IPAddress gateway(10, 10, 1, 1);    // Set your Gateway IP address

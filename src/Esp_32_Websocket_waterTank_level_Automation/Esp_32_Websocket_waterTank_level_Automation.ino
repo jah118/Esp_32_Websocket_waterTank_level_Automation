@@ -101,8 +101,8 @@ const int tankFloating_2_sen_2 = 14;
 const int tankFloating_2_sen_3 = 13;
 
 //Wifi
-const char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
-const char* password = "1PoulThomsen";
+const char* ssid     = "ssid"; //_TP-LINK
+const char* password = "password";
 
 // Globals
 const char* PARAM_MESSAGE = "message";
