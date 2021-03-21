@@ -4,3 +4,6 @@ src/Esp_32_Websocket_waterTank_level_Automation/data/.vs/slnx.sqlite
 src/Esp_32_Websocket_waterTank_level_Automation/data/.vs/ProjectSettings.json
 src/Esp_32_Websocket_waterTank_level_Automation/data/.vs/data/v16/.suo
 src/Esp_32_Websocket_waterTank_level_Automation/data/.vs/data/config/applicationhost.config
+src/socket_watertank_level/include/README
+src/socket_watertank_level/lib/README
+src/socket_watertank_level/test/README

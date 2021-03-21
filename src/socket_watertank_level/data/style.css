@@ -1,0 +1,224 @@
+section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+section .wrapper {
+  margin: 70px 50px 0 50px;
+}
+body {
+  padding: 50px 0;
+  text-align: center;
+  font-family: "Trebuchet MS", Arial;
+}
+
+input {
+  margin-bottom: 30px;
+}
+
+.cylinder {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  width: 100px;
+  height: 300px;
+  border-radius: 50px/25px;
+  background-color: rgba(160, 160, 160, 0.5);
+}
+
+.cylinder:before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100px;
+  height: 50px;
+  border-radius: 50px/25px;
+  background-color: rgba(160, 160, 160, 0.2);
+  content: "";
+}
+
+.cylinder:after {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100px;
+  height: 50px;
+  border-radius: 50px/25px;
+  background-color: rgba(160, 160, 160, 0.4);
+  content: "";
+}
+
+.water {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100px;
+  height: 0;
+  padding-top: 50px;
+  border-radius: 50px/25px;
+  background-color: rgba(0, 160, 160, 0.5);
+  transition: 0.3s linear;
+}
+
+.water:before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100px;
+  height: 50px;
+  border-radius: 50px/25px;
+  background-color: rgba(0, 160, 160, 0.2);
+  content: "";
+}
+
+.water:after {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100px;
+  height: 50px;
+  border-radius: 50px/25px;
+  background-color: rgba(0, 160, 160, 0.4);
+  content: "";
+}
+
+.water--0:checked ~ .cylinder .water {
+  bottom: -50px;
+}
+
+.water--12:checked ~ .cylinder .water {
+  height: calc(250px * 0.12.5);
+}
+
+.water--25:checked ~ .cylinder .water {
+  height: calc(250px * 0.25);
+}
+
+.water--50:checked ~ .cylinder .water {
+  height: calc(250px * 0.5);
+}
+.water--75:checked ~ .cylinder .water {
+  height: calc(250px * 0.75);
+}
+
+.water--100:checked ~ .cylinder .water {
+  height: calc(250px * 0.999);
+}
+
+table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+}
+th {
+  padding: 12px;
+  background-color: #0043af;
+  color: white;
+}
+tr {
+  border: 1px solid #ddd;
+  padding: 12px;
+}
+tr:hover {
+  background-color: #bcbcbc;
+}
+td {
+  border: none;
+  padding: 12px;
+}
+.sensor {
+  color: white;
+  font-weight: bold;
+  background-color: #bcbcbc;
+  padding: 1px;
+}
+
+table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+}
+th {
+  padding: 12px;
+  background-color: #0043af;
+  color: white;
+}
+tr {
+  border: 1px solid #ddd;
+  padding: 12px;
+}
+tr:hover {
+  background-color: #bcbcbc;
+}
+td {
+  border: none;
+  padding: 12px;
+}
+.sensor {
+  color: white;
+  font-weight: bold;
+  background-color: #bcbcbc;
+  padding: 1px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
