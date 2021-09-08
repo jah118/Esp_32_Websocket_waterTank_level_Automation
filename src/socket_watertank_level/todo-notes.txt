@@ -1,0 +1,17 @@
+each level have corsponding led, tankFloating_sen_1, tankSensorValue1_1 
+
+instead of declaring these manuel
+then create a array foreach of them and then the first value is 0 then
+add them in as first sensor = first led = floation, and have function for adding them.
+
+then change method to go though array instead of  setLedStatus(bool led_1, bool led_2, bool led_3, bool led_4, bool led_5)
+
+when they need declaring then 
+https://www.nongnu.org/avr-libc/user-manual/FAQ.html
+https://forum.arduino.cc/t/get-the-length-of-an-array/41119/3
+
+
+
+
+next step let this be done from fron end by having a file spiffs to read from and setting to 
+so then same for relay pin declaring, 
