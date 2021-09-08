@@ -15,8 +15,8 @@ Adafruit_BME280 bme; // I2C
 const char* PARAM_MESSAGE = "message";
 
 
-char* ssid     = "Hnet_TP-LINK"; //_TP-LINK
-char* password = "1PoulThomsen";
+char* ssid     = ""; //
+char* password = "";
 
 
 // Globals

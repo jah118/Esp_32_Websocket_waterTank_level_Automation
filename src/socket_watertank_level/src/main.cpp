@@ -77,7 +77,7 @@ const int tankFloating_sen_4 = 35;
 const int tankFloating_sen_5 = 32;
 
 //Waterlevel sensor values
-int sensorOn = 2400; //700 old 
+int sensorOn = 2400; //700 old
 int tankSensorValue1_1 = 0;
 int tankSensorValue1_2 = 0;
 int tankSensorValue1_3 = 0;
@@ -99,13 +99,13 @@ const int tankFloating_2_sen_2 = 14;
 const int tankFloating_2_sen_3 = 13;
 
 //Wifi
-const char *ssid = "ssid"; //_TP-LINK
-const char *password = "password";
+// const char *ssid = "ssid"; //_TP-LINK
+// const char *password = "password";
 
+// Set your Static IP address
 IPAddress local_IP(10, 10, 1, 112); // Set your Static IP address
 IPAddress gateway(10, 10, 1, 1);    // Set your Gateway IP address
 IPAddress subnet(255, 255, 255, 0); // Set your Subnet address
-
 
 // Globals
 const char *PARAM_MESSAGE = "message";
@@ -192,11 +192,7 @@ void tankLevelCheck()
     relaySafeToUse = false;
     waterLevelState = "Level_0";
     setLedStatus(LOW, LOW, LOW, LOW, LOW);
-    // digitalWrite(led_1_pin, LOW);
-    // digitalWrite(led_2_pin, LOW);
-    // digitalWrite(led_3_pin, LOW);
-    // digitalWrite(led_4_pin, LOW);
-    // digitalWrite(led_5_pin, LOW);
+
     if (currentMillis - previousMillis >= interval)
     {
       // save the last time sent to serial;
@@ -211,11 +207,6 @@ void tankLevelCheck()
     waterLevelState = "Level_12.5";
     setLedStatus(HIGH, LOW, LOW, LOW, LOW);
 
-    // digitalWrite(led_1_pin, HIGH);
-    // digitalWrite(led_2_pin, LOW);
-    // digitalWrite(led_3_pin, LOW);
-    // digitalWrite(led_4_pin, LOW);
-    // digitalWrite(led_5_pin, LOW);
     if (currentMillis - previousMillis >= interval)
     {
       // save the last time sent to serial;
@@ -229,11 +220,7 @@ void tankLevelCheck()
     relaySafeToUse = true;
     waterLevelState = "Level_25";
     setLedStatus(HIGH, HIGH, LOW, LOW, LOW);
-    // digitalWrite(led_1_pin, HIGH);
-    // digitalWrite(led_2_pin, HIGH);
-    // digitalWrite(led_3_pin, LOW);
-    // digitalWrite(led_4_pin, LOW);
-    // digitalWrite(led_5_pin, LOW);
+
     if (currentMillis - previousMillis >= interval)
     {
       // save the last time sent to serial;
@@ -246,11 +233,7 @@ void tankLevelCheck()
     relaySafeToUse = true;
     waterLevelState = "Level_50";
     setLedStatus(HIGH, HIGH, HIGH, LOW, LOW);
-    // digitalWrite(led_1_pin, HIGH);
-    // digitalWrite(led_2_pin, HIGH);
-    // digitalWrite(led_3_pin, HIGH);
-    // digitalWrite(led_4_pin, LOW);
-    // digitalWrite(led_5_pin, LOW);
+
     if (currentMillis - previousMillis >= interval)
     {
       // save the last time sent to serial;
@@ -263,11 +246,7 @@ void tankLevelCheck()
     relaySafeToUse = true;
     waterLevelState = "Level_75";
     setLedStatus(HIGH, HIGH, HIGH, HIGH, LOW);
-    // digitalWrite(led_1_pin, HIGH);
-    // digitalWrite(led_2_pin, HIGH);
-    // digitalWrite(led_3_pin, HIGH);
-    // digitalWrite(led_4_pin, HIGH);
-    // digitalWrite(led_5_pin, LOW);
+
     if (currentMillis - previousMillis >= interval)
     {
       // save the last time sent to serial;
@@ -279,11 +258,7 @@ void tankLevelCheck()
   {
     relaySafeToUse = true;
     setLedStatus(HIGH, HIGH, HIGH, HIGH, HIGH);
-    // digitalWrite(led_1_pin, HIGH);
-    // digitalWrite(led_2_pin, HIGH);
-    // digitalWrite(led_3_pin, HIGH);
-    // digitalWrite(led_4_pin, HIGH);
-    // digitalWrite(led_5_pin, HIGH);
+
     waterLevelState = "Level_100";
     if (currentMillis - previousMillis >= interval)
     {
@@ -301,25 +276,10 @@ void tankLevelCheck()
     Serial.println("sensor error");
 
     setLedStatus(LOW, LOW, LOW, LOW, LOW);
-    // digitalWrite(led_1_pin, LOW);
-    // digitalWrite(led_2_pin, LOW);
-    // digitalWrite(led_3_pin, LOW);
-    // digitalWrite(led_4_pin, LOW);
-    // digitalWrite(led_5_pin, LOW);
     delay(200);
     setLedStatus(HIGH, HIGH, HIGH, HIGH, HIGH);
-    // digitalWrite(led_1_pin, HIGH);
-    // digitalWrite(led_2_pin, HIGH);
-    // digitalWrite(led_3_pin, HIGH);
-    // digitalWrite(led_4_pin, HIGH);
-    // digitalWrite(led_5_pin, HIGH);
     delay(200);
     setLedStatus(LOW, LOW, LOW, LOW, LOW);
-    // digitalWrite(led_1_pin, LOW);
-    // digitalWrite(led_2_pin, LOW);
-    // digitalWrite(led_3_pin, LOW);
-    // digitalWrite(led_4_pin, LOW);
-    // digitalWrite(led_5_pin, LOW);
   }
 }
 
@@ -670,6 +630,10 @@ void setup()
   //  WiFi.softAP(ssid, password);
   Serial.print("Attempting to connect to SSID: ");
   Serial.println(ssid);
+  if (!WiFi.config(local_IP, gateway, subnet))
+  {
+    Serial.println("STA Failed to configure");
+  }
   WiFi.begin(ssid, password);
   Serial.begin(115200);
   while (WiFi.status() != WL_CONNECTED)
@@ -679,17 +643,17 @@ void setup()
 
     delay(1000);
   }
-  
+
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 
-  // Serial.println();
-  // Serial.println("AP running");
-  // Serial.print("My IP address: ");
-  // Serial.println(WiFi.softAPIP());
+  Serial.println();
+  Serial.println("AP running");
+  Serial.print("My IP address: ");
+  Serial.println(WiFi.softAPIP());
 
   // default settings
   // (you can also pass in a Wire library object like &Wire2)
